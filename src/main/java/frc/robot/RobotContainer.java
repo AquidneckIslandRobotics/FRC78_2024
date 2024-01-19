@@ -19,18 +19,26 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Systems.Elevator;
 import frc.robot.Systems.Chassis.*;
 import frc.robot.Commands.*;
 
 public class RobotContainer {
   private Chassis m_chassis;
+  private Elevator m_Elevator;
   private XboxController m_driveController;
+  private XboxController m_testController;
   private final SendableChooser<Command> autoChooser;
 
   public RobotContainer() {
     m_chassis = new Chassis();
 
+    m_Elevator = new Elevator();
+  
+
     m_driveController = new XboxController(0);
+
+    m_testController = new XboxController(5);
 
     m_chassis.setDefaultCommand(new Drive(
       m_chassis,
@@ -54,6 +62,9 @@ public class RobotContainer {
 
   private void configureBindings() {
     new Trigger(m_driveController::getStartButton).onTrue(new InstantCommand(() -> m_chassis.resetPose(new Pose2d())));
+
+    new Trigger(m_testController::getYButton).whileTrue(new SetElevator(m_Elevator, -0.1)).onFalse(new SetElevator(m_Elevator, 0));
+    new Trigger(m_testController::getAButton).whileTrue(new SetElevator(m_Elevator, 0.1)).onFalse(new SetElevator(m_Elevator, 0));
   }
 
   public Command getAutonomousCommand() {
