@@ -12,11 +12,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.classes.Util;
+import frc.robot.classes.Structs;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.PoseEstimator;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class OrbitalTarget extends Command {
@@ -24,20 +24,16 @@ public class OrbitalTarget extends Command {
   private final Chassis chassis;
   private final PoseEstimator poseEstimator;
 
-  private final DoubleSupplier xSupplier;
-  private final DoubleSupplier ySupplier;
-  private final DoubleSupplier lTriggerSupplier;
-  private final DoubleSupplier rTriggerSupplier;
-
   private final Translation2d targetPose;
 
+  private final Supplier<ChassisSpeeds> speedsSupplier;
   private final PIDController xController;
   private final PIDController yController;
   private final PIDController rotController;
 
   private PIDConstants translationPID;
   private PIDConstants rotationPID;
-  private double maxSpeed;
+  private Structs.MotionLimits motionLimits;
 
   // Target pose in field space for the robot to move to
   private double xTarget;
@@ -51,25 +47,18 @@ public class OrbitalTarget extends Command {
 
   public OrbitalTarget(
       Chassis chassis,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier rotSupplier,
-      DoubleSupplier lTriggerSupplier,
-      DoubleSupplier rTriggerSupplier,
+      Supplier<ChassisSpeeds> speedsSupplier,
       PIDConstants translationPID,
       PIDConstants rotationPID,
-      double maxSpeed,
+      Structs.MotionLimits motionLimits,
       PoseEstimator poseEstimator) {
 
     this.chassis = chassis;
     this.poseEstimator = poseEstimator;
-    this.xSupplier = xSupplier;
-    this.ySupplier = ySupplier;
-    this.lTriggerSupplier = lTriggerSupplier;
-    this.rTriggerSupplier = rTriggerSupplier;
     this.translationPID = translationPID;
     this.rotationPID = rotationPID;
-    this.maxSpeed = maxSpeed;
+    this.motionLimits = motionLimits;
+    this.speedsSupplier = speedsSupplier;
 
     // Might be shorter way of doing this
     if (DriverStation.getAlliance().isPresent()) {
@@ -90,32 +79,14 @@ public class OrbitalTarget extends Command {
   }
 
   @Override
-  public void initialize() {
-    targetRobotAngle =
-        Math.atan2(
-            poseEstimator.getFusedPose().getY() - targetPose.getY(),
-            poseEstimator.getFusedPose().getX() - targetPose.getX());
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // This first bit basically calculates polar coordinates for the robot with the target as the
-    // origin
-    // Change target orbit distance based on joystick input
-
-    // orbitDistance = Constants.ORBIT_RADIUS + (ySupplier.getAsDouble() *
-    // Constants.ORBIT_RADIUS_MARGIN);
-    orbitDistance = Constants.ORBIT_RADIUS;
-    lateralSpeed =
-        Util.modifyJoystick(xSupplier.getAsDouble())
-            * maxSpeed
-            * Util.triggerAdjust(lTriggerSupplier.getAsDouble(), rTriggerSupplier.getAsDouble())
-            * 0.02;
-    targetRobotAngle = targetRobotAngle + (Math.asin(lateralSpeed / orbitDistance));
 
     // Then converts the polar coordinates to field coordinates
-    calcTargetPose();
+    calcTargetDistance();
     Logger.recordOutput(
         "Orbit Goal", new Pose2d(xTarget, yTarget, Rotation2d.fromRadians(rotTarget)));
 
@@ -146,17 +117,8 @@ public class OrbitalTarget extends Command {
     return false;
   }
 
-  public void calcTargetPose() {
-    xTarget = Math.cos(targetRobotAngle) * orbitDistance;
-    yTarget = Math.sin(targetRobotAngle) * orbitDistance;
-
-    xTarget += targetPose.getX();
-    yTarget += targetPose.getY();
-
-    rotTarget =
-        targetRobotAngle
-            + Math.PI; // Offset by 180 degrees to get robot-target angle as this is the angle the
-    // robot will be facing
-    rotTarget = rotTarget % (2 * Math.PI); // Wrap angle to [0, 2 * PI)
+  public void calcTargetDistance() {
+    Structs.Vector2 targetToRobot =
+        new Structs.Vector2(targetPose, poseEstimator.getFusedPose().getTranslation());
   }
 }

@@ -42,4 +42,9 @@ public class Util {
     // value = Math.copySign(value * value, value);
     return value;
   }
+
+  public static Structs.Vector2 normalizeVector(Structs.Vector2 vector) {
+    double magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+    return new Structs.Vector2(vector.x / magnitude, vector.y / magnitude);
+  }
 }

@@ -4,6 +4,8 @@
 
 package frc.robot.classes;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 /** Class for structs */
 public class Structs {
 
@@ -39,6 +41,20 @@ public class Structs {
       this.maxAcceleration = maxAcceleration;
       this.maxAngularSpeed = maxAngularSpeed;
       this.maxAngularAcceleration = maxAngularAcceleration;
+    }
+  }
+
+  public static class Vector2 {
+    public double x, y;
+
+    public Vector2(double x, double y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    public Vector2(Translation2d v1, Translation2d v2) {
+      this.x = v2.getX() - v1.getX();
+      this.y = v2.getY() - v1.getY();
     }
   }
 }
