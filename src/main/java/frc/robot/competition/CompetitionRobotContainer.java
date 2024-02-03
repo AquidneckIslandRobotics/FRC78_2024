@@ -36,7 +36,7 @@ class CompetitionRobotContainer {
   private final Elevator m_Elevator;
   private final CommandXboxController m_driveController;
   private final CommandXboxController m_manipController;
-  private final CommandXboxController sysIdController;
+  private final CommandXboxController m_sysIDController;
   private final SendableChooser<Command> autoChooser;
 
   CompetitionRobotContainer() {
@@ -59,7 +59,7 @@ class CompetitionRobotContainer {
     m_driveController = new CommandXboxController(0);
     m_manipController = new CommandXboxController(1);
     // Put on port 5 because we only want to use this during tests
-    sysIdController = new CommandXboxController(5);
+    m_sysIDController = new CommandXboxController(5);
 
     m_baseDrive =
         new BaseDrive(
@@ -183,7 +183,8 @@ class CompetitionRobotContainer {
                 m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
-                RobotConstants.ROTATION_FF));
+                RobotConstants.ROTATION_FF,
+                RobotConstants.ROBOT_RADIUS));
 
     m_manipController.y().whileTrue(m_Elevator.moveElevatorUp());
 
@@ -193,10 +194,10 @@ class CompetitionRobotContainer {
     m_manipController.b().whileTrue(m_intake.outtakeCommand());
 
     // The routine automatically stops the motors at the end of the command
-    sysIdController.a().whileTrue(m_chassis.sysIdQuasistatic(Direction.kForward));
-    sysIdController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
-    sysIdController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
-    sysIdController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
+    m_sysIDController.a().whileTrue(m_chassis.sysIdQuasistatic(Direction.kForward));
+    m_sysIDController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
+    m_sysIDController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
+    m_sysIDController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
   }
 
   public Command getAutonomousCommand() {

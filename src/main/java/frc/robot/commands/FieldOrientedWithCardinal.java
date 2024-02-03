@@ -15,6 +15,7 @@ import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class FieldOrientedWithCardinal extends Command {
   private final Chassis chassis;
@@ -25,6 +26,7 @@ public class FieldOrientedWithCardinal extends Command {
   private final ProfiledPIDController thetaPID;
   private final SimpleMotorFeedforward thetaFF;
   private ChassisSpeeds speeds;
+  private final double robotRadius;
 
   /** Creates a new FieldOrientedDrive. */
   public FieldOrientedWithCardinal(
@@ -34,12 +36,14 @@ public class FieldOrientedWithCardinal extends Command {
       Supplier<ChassisSpeeds> speedsSupplier,
       PIDConstants cardinalPidConstants,
       Constraints constraints,
-      Structs.FFConstants ffConstants) {
+      Structs.FFConstants ffConstants,
+      double robotRadius) {
     this.chassis = chassis;
     this.poseEstimator = poseEstimator;
     this.speedsSupplier = speedsSupplier;
     this.speeds = speedsSupplier.get();
     this.direction = direction;
+    this.robotRadius = robotRadius;
 
     thetaPID =
         new ProfiledPIDController(
@@ -62,7 +66,10 @@ public class FieldOrientedWithCardinal extends Command {
 
     double cardinalRotSpeed =
         thetaPID.calculate(poseEstimator.getFusedPose().getRotation().getRadians());
-    speeds.omegaRadiansPerSecond = cardinalRotSpeed;
+    speeds.omegaRadiansPerSecond =
+        cardinalRotSpeed + thetaFF.calculate(thetaPID.getSetpoint().velocity);
+
+    Logger.recordOutput("CardinalSetpoint", thetaPID.getSetpoint().position);
 
     chassis.driveRobotRelative(
         ChassisSpeeds.fromFieldRelativeSpeeds(speeds, poseEstimator.getFusedPose().getRotation()));

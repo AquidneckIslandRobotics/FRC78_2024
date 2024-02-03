@@ -94,8 +94,12 @@ public class Chassis extends SubsystemBase {
     for (SwerveModule module : modules) {
       // Call the open loop method, which sends a voltage with no feedback to the motors, but holds
       // the wheel at 0 degrees
-      module.openLoopDiffDrive(voltage.in(Volts));
+      module.openLoopDiffDrive(voltage.in(Volts), 0);
     }
+    modules[0].openLoopDiffDrive(voltage.in(Volts), 0.375);
+    modules[1].openLoopDiffDrive(voltage.in(Volts), 0.125);
+    modules[2].openLoopDiffDrive(voltage.in(Volts), -0.375);
+    modules[3].openLoopDiffDrive(voltage.in(Volts), -0.125);
   }
 
   private SysIdRoutine drivetrainRoutine =
@@ -104,9 +108,12 @@ public class Chassis extends SubsystemBase {
           new SysIdRoutine.Mechanism(this::voltageDrive, this::logMotor, this));
 
   public void logMotor(SysIdRoutineLog log) {
+    int i = 0;
     for (SwerveModule module : modules) {
       // Each motor will write to the log directly
       module.logMotor(log);
+      // log.motor("motor#" + i);
+      i++;
     }
   }
 

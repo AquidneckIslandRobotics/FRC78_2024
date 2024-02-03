@@ -226,8 +226,8 @@ public class NeoModule implements SwerveModule {
     SmartDashboard.putNumber(config.driveID + "setting speed", optimizedState.speedMetersPerSecond);
   }
 
-  public void openLoopDiffDrive(double voltage) {
-    steerPID.setReference(0, ControlType.kPosition);
+  public void openLoopDiffDrive(double voltage, double angle) {
+    steerPID.setReference(angle, ControlType.kPosition);
     drive.setVoltage(voltage);
   }
 

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.commands.*;
@@ -30,6 +31,7 @@ class TestChassisContainer {
   public final PoseEstimator m_poseEstimator;
   private PhotonCamera m_ATCamera;
   private final CommandXboxController m_driveController;
+  private final CommandXboxController m_sysIDController;
   private final SendableChooser<Command> autoChooser;
 
   TestChassisContainer() {
@@ -50,6 +52,7 @@ class TestChassisContainer {
     m_poseEstimator = new PoseEstimator(m_chassis, m_ATCamera, RobotConstants.PIGEON_ID);
 
     m_driveController = new CommandXboxController(0);
+    m_sysIDController = new CommandXboxController(5);
 
     m_baseDrive =
         new BaseDrive(
@@ -167,7 +170,13 @@ class TestChassisContainer {
                 m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
-                RobotConstants.ROTATION_FF));
+                RobotConstants.ROTATION_FF,
+                RobotConstants.ROBOT_RADIUS));
+
+    m_sysIDController.a().whileTrue(m_chassis.sysIdQuasistatic(Direction.kForward));
+    m_sysIDController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
+    m_sysIDController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
+    m_sysIDController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
   }
 
   public Command getAutonomousCommand() {
