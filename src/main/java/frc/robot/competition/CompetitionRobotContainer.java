@@ -58,6 +58,7 @@ class CompetitionRobotContainer {
   private final CommandXboxController m_manipController;
   private final CommandXboxController m_testController;
   private final CommandXboxController sysIdController;
+  private final CommandXboxController sysIdController2;
   private final SendableChooser<Command> autoChooser;
   private final Command pickUpNote;
   private final Command AmpSetUp;
@@ -98,8 +99,9 @@ class CompetitionRobotContainer {
     m_driveController = new CommandXboxController(0);
     m_manipController = new CommandXboxController(1);
     m_testController = new CommandXboxController(2);
-    // Put on port 5 because we only want to use this during tests
-    sysIdController = new CommandXboxController(5);
+    // Put on ports 4 & 5 because we only want to use this during tests
+    sysIdController = new CommandXboxController(4);
+    sysIdController2 = new CommandXboxController(5);
 
     m_baseDrive =
         new BaseDrive(
@@ -307,6 +309,40 @@ class CompetitionRobotContainer {
 
     RobotModeTriggers.disabled()
         .onTrue(m_Wrist.enableCoastMode().andThen(m_chassis.enableCoastMode()));
+
+    sysIdController2
+        .a()
+        .and(sysIdController.leftBumper())
+        .whileTrue(m_Wrist.sysIdQuasistatic(Direction.kForward));
+    sysIdController2
+        .b()
+        .and(sysIdController.leftBumper())
+        .whileTrue(m_Wrist.sysIdQuasistatic(Direction.kReverse));
+    sysIdController2
+        .x()
+        .and(sysIdController.leftBumper())
+        .whileTrue(m_Wrist.sysIdDynamic(Direction.kForward));
+    sysIdController2
+        .y()
+        .and(sysIdController.leftBumper())
+        .whileTrue(m_Wrist.sysIdDynamic(Direction.kReverse));
+
+    sysIdController2
+        .a()
+        .and(sysIdController.rightBumper())
+        .whileTrue(m_Elevator.sysIdQuasistatic(Direction.kForward));
+    sysIdController2
+        .b()
+        .and(sysIdController.rightBumper())
+        .whileTrue(m_Elevator.sysIdQuasistatic(Direction.kReverse));
+    sysIdController2
+        .x()
+        .and(sysIdController.rightBumper())
+        .whileTrue(m_Elevator.sysIdDynamic(Direction.kForward));
+    sysIdController2
+        .y()
+        .and(sysIdController.rightBumper())
+        .whileTrue(m_Elevator.sysIdDynamic(Direction.kReverse));
   }
 
   public Command getAutonomousCommand() {
