@@ -51,10 +51,17 @@ class CompetitionRobotContainer {
 
   CompetitionRobotContainer() {
 
-    NeoModule frontLeft = makeSwerveModule(1, 2);
-    NeoModule frontRight = makeSwerveModule(3, 4);
-    NeoModule backLeft = makeSwerveModule(5, 6);
-    NeoModule backRight = makeSwerveModule(7, 8);
+    NeoModule frontLeft =
+        makeSwerveModule(1, 2, new ModuleConfig.ClosedLoopParameters(0, 0, 0, .19299, 2.591, .5));
+    NeoModule frontRight =
+        makeSwerveModule(
+            3, 4, new ModuleConfig.ClosedLoopParameters(0, 0, 0, .19796, 2.6267, .71832));
+    NeoModule backLeft =
+        makeSwerveModule(
+            5, 6, new ModuleConfig.ClosedLoopParameters(0, 0, 0, .18729, 2.6374, 0.72905));
+    NeoModule backRight =
+        makeSwerveModule(
+            7, 8, new ModuleConfig.ClosedLoopParameters(0, 0, 0, .22633, 2.6213, .50511));
 
     SwerveModule[] modules = new SwerveModule[] {frontLeft, frontRight, backLeft, backRight};
 
@@ -153,11 +160,11 @@ class CompetitionRobotContainer {
         frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation);
   }
 
-  private NeoModule makeSwerveModule(int driveId, int steerId) {
-    ModuleConfig.ClosedLoopParameters driveClosedLoopParams =
-        new ModuleConfig.ClosedLoopParameters(0.1, 0, 0, 1 / RobotConstants.DRIVE_WHEEL_FREESPEED);
+  private NeoModule makeSwerveModule(
+      int driveId, int steerId, ModuleConfig.ClosedLoopParameters driveClosedLoopParams) {
+    // No feedforward necessary for the steer modules
     ModuleConfig.ClosedLoopParameters steerClosedLoopParams =
-        new ModuleConfig.ClosedLoopParameters(18, 0, 0, 0);
+        new ModuleConfig.ClosedLoopParameters(18, 0, 0, 0, 0, 0);
     return new NeoModule(
         new ModuleConfig(
             driveId,

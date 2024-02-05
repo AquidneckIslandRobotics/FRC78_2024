@@ -4,37 +4,38 @@
 
 package frc.robot.competition;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import frc.robot.classes.Structs;
 
 /** This is the constants for the NEO */
 class RobotConstants {
-  public static final double WHEEL_WIDTH =
-      Units.inchesToMeters(18.75); // Make sure this is from the wheel's center
-  // of rotation
-  public static final double WHEEL_DIAMETER =
-      Units.inchesToMeters(4); // TODO measure more precisely
+  public static final double WHEEL_WIDTH = Units.inchesToMeters(16.75);
+  public static final double WHEEL_DIAMETER = Units.inchesToMeters(4);
 
-  public static final double ROBOT_RADIUS = Math.hypot(WHEEL_WIDTH / 2.0, WHEEL_WIDTH / 2.0);
+  public static final Measure<Distance> ROBOT_RADIUS = Meters.of(.301);
 
   public static final int PIGEON_ID = 0;
 
   public static final String AT_CAMERA_NAME = "Microsoft_LifeCam_HD-3000";
 
   public static final Structs.MotionLimits MOTION_LIMITS =
-      new Structs.MotionLimits(4, 3 /*TODO */, 8, 12);
+      new Structs.MotionLimits(4, 3 /*TODO */, 13, 12);
 
   public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG =
       new HolonomicPathFollowerConfig(
           new PIDConstants(5, 0.0, 0.0), // Translation PID constants
           new PIDConstants(5, 0.0, 0.0), // Rotation PID constants
           RobotConstants.MOTION_LIMITS.maxSpeed, // Max module speed, in m/s
-          RobotConstants.ROBOT_RADIUS, // Drive base radius in meters
+          RobotConstants.ROBOT_RADIUS.in(Meters), // Drive base radius in meters
           new ReplanningConfig() // Default path replanning config.
           );
   // TODO Since the above and below are both PID constants for moving the robot to
@@ -50,11 +51,7 @@ class RobotConstants {
   public static final Structs.RateLimits RATE_LIMITS = new Structs.RateLimits(11, 30);
 
   // WHEELS //
-  public static final double DRIVE_GEAR_RATIO = (6.75); // TODO need to update for L3
-  public static final double DRIVE_MOTOR_FREESPEED_RPS = 5676 / 60; // Free RPM of NEO to RPS
-  public static final double DRIVE_WHEEL_FREESPEED =
-      (DRIVE_MOTOR_FREESPEED_RPS * (WHEEL_DIAMETER * Math.PI))
-          / DRIVE_GEAR_RATIO; // Converted for wheel
+  public static final double DRIVE_GEAR_RATIO = 5.35;
 
   public static final double DRIVE_ENC_TO_METERS = (WHEEL_DIAMETER * Math.PI) / DRIVE_GEAR_RATIO;
   public static final double DRIVE_ENC_VEL_TO_METERS_PER_SECOND =

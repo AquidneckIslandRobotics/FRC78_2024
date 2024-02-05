@@ -15,6 +15,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 import com.revrobotics.SparkPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -39,7 +40,7 @@ public class NeoModule implements SwerveModule {
   private RelativeEncoder driveEnc;
   private AbsoluteEncoder steerEnc;
 
-  private SwerveModuleState desiredState;
+  private SimpleMotorFeedforward driveFeedforward;
 
   public NeoModule(ModuleConfig config) {
     this.config = config;
@@ -51,8 +52,6 @@ public class NeoModule implements SwerveModule {
     steerEnc = steer.getAbsoluteEncoder(Type.kDutyCycle);
     drivePID = drive.getPIDController();
     steerPID = steer.getPIDController();
-
-    desiredState = new SwerveModuleState();
 
     initialize();
   }
@@ -97,13 +96,16 @@ public class NeoModule implements SwerveModule {
     drivePID.setP(config.driveClosedLoopParameters.kP);
     drivePID.setI(config.driveClosedLoopParameters.kI);
     drivePID.setD(config.driveClosedLoopParameters.kD);
-    drivePID.setFF(config.driveClosedLoopParameters.kF);
+    this.driveFeedforward =
+        new SimpleMotorFeedforward(
+            config.driveClosedLoopParameters.kS,
+            config.driveClosedLoopParameters.kV,
+            config.driveClosedLoopParameters.kA);
 
     // Set the PID gains for the turning motor
     steerPID.setP(config.steerClosedLoopParameters.kP);
     steerPID.setI(config.steerClosedLoopParameters.kI);
     steerPID.setD(config.steerClosedLoopParameters.kD);
-    steerPID.setFF(config.steerClosedLoopParameters.kF);
 
     drive.setSmartCurrentLimit(config.driveCurrentLimit);
     steer.setSmartCurrentLimit(config.steerCurrentLimit);
@@ -119,13 +121,6 @@ public class NeoModule implements SwerveModule {
     drive.burnFlash();
     steer.burnFlash();
 
-    desiredState.angle = Rotation2d.fromRotations(steerEnc.getPosition());
-    driveEnc.setPosition(0);
-  }
-
-  /** Resets the drive encoder to 0 meters */
-  @Override
-  public void resetEncoders() {
     driveEnc.setPosition(0);
   }
 
@@ -173,34 +168,6 @@ public class NeoModule implements SwerveModule {
   }
 
   /**
-   * Sets the desired velocity of the module. Should only be used if you want to ONLY set the
-   * velocity. If not, then use {@link #setDesiredState(SwerveModuleState)}
-   *
-   * @param velocity The desired velocity of the module, in meters per second
-   */
-  @Override
-  public void setVelocity(double velocity) {
-    drivePID.setReference(velocity, CANSparkMax.ControlType.kVelocity);
-
-    desiredState.speedMetersPerSecond = velocity;
-  }
-
-  /**
-   * Sets the desired rotation of the module. Should only be used if you want to ONLY set the
-   * rotation. If not, then use {@link #setDesiredState(SwerveModuleState)}
-   *
-   * @param rotation The desired rotation of the module
-   */
-  @Override
-  public void setRotation(Rotation2d rotation) {
-    // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState correctedState =
-        SwerveModuleState.optimize(new SwerveModuleState(0, rotation), getSteerPosition());
-    steerPID.setReference(correctedState.angle.getRotations(), CANSparkMax.ControlType.kPosition);
-    desiredState.angle = rotation;
-  }
-
-  /**
    * Sets the desired state of the module. Should be used if you want to set both the velocity and
    * rotation at the same time
    *
@@ -212,16 +179,15 @@ public class NeoModule implements SwerveModule {
     SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getSteerPosition());
 
     // Sets the PID goals to the desired states
-    drivePID.setReference(optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
+    double driveFf =
+        driveFeedforward.calculate(
+            driveEnc.getVelocity(), optimizedState.speedMetersPerSecond, 0.02);
+    drivePID.setReference(
+        optimizedState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity, 0, driveFf);
     steerPID.setReference(optimizedState.angle.getRotations(), CANSparkMax.ControlType.kPosition);
 
-    desiredState = state;
-    SmartDashboard.putNumber(
-        config.driveID + " setting rot",
-        optimizedState.angle
-            .getRotations()); // Changed this to divide by 2 pi and ad o.5 to map the joystick input
-    // (-pi to pi) to a zero to 1
-    SmartDashboard.putNumber(config.driveID + " getting rot", steerEnc.getPosition() - Math.PI);
+    SmartDashboard.putNumber(config.driveID + " setting rot", optimizedState.angle.getRotations());
+    SmartDashboard.putNumber(config.driveID + " getting rot", steerEnc.getPosition());
     SmartDashboard.putNumber(config.driveID + "getting speed", getDriveVelocity());
     SmartDashboard.putNumber(config.driveID + "setting speed", optimizedState.speedMetersPerSecond);
   }

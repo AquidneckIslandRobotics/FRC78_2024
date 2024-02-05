@@ -101,9 +101,10 @@ class TestChassisContainer {
 
   private NeoModule makeSwerveModule(int driveId, int steerId) {
     ModuleConfig.ClosedLoopParameters driveClosedLoopParams =
-        new ModuleConfig.ClosedLoopParameters(0.1, 0, 0, 1 / RobotConstants.DRIVE_WHEEL_FREESPEED);
+        new ModuleConfig.ClosedLoopParameters(
+            0.1, 0, 0, 0, 12 / RobotConstants.DRIVE_WHEEL_FREESPEED, 0);
     ModuleConfig.ClosedLoopParameters steerClosedLoopParams =
-        new ModuleConfig.ClosedLoopParameters(18, 0, 0, 0);
+        new ModuleConfig.ClosedLoopParameters(18, 0, 0, 0, 0, 0);
     return new NeoModule(
         new ModuleConfig(
             driveId,
