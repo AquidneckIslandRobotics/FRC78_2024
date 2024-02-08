@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
 import frc.robot.classes.ModuleConfig;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Shooter.ShooterConfig;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
@@ -222,6 +224,10 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF));
+
+    //sets elevator to coast when disabled and brake when enabled
+    RobotModeTriggers.disabled().onTrue(m_Elevator.elevatorCoast());
+    RobotModeTriggers.disabled().onFalse(m_Elevator.elevatorBrake());
 
     m_manipController.y().whileTrue(m_Elevator.moveElevatorUp());
     m_manipController.x().whileTrue(m_Elevator.moveElevatorDown());

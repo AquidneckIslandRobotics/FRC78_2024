@@ -45,4 +45,18 @@ public class Elevator extends SubsystemBase {
   public Command moveElevatorDown() {
     return this.startEnd(() -> elevNeoMotor1.set(-.1), () -> elevNeoMotor1.set(0));
   }
+
+  public Command elevatorCoast() {
+    return this.runOnce(() -> {
+      this.elevNeoMotor1.setIdleMode(IdleMode.kCoast);
+      this.elevNeoMotor2.setIdleMode(IdleMode.kCoast);
+    });
+  }
+  
+  public Command elevatorBrake() {
+    return this.runOnce(() -> {
+      this.elevNeoMotor1.setIdleMode(IdleMode.kBrake);
+      this.elevNeoMotor2.setIdleMode(IdleMode.kBrake);
+    });
+  }
 }
