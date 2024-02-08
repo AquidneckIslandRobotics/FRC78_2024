@@ -230,7 +230,7 @@ class CompetitionRobotContainer {
 
     //sets elevator to coast when disabled and brake when enabled
     RobotModeTriggers.disabled().onTrue(m_Elevator.elevatorCoast());
-    RobotModeTriggers.disabled().onFalse(m_Elevator.elevatorBrake());
+    RobotModeTriggers.disabled().onFalse(m_Elevator.elevatorBrake());         
 
     m_manipController.y().whileTrue(m_Elevator.moveElevatorUp());
     m_manipController.x().whileTrue(m_Elevator.moveElevatorDown());

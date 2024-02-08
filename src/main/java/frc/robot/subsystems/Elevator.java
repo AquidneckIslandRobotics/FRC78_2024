@@ -45,7 +45,6 @@ public class Elevator extends SubsystemBase {
   public Command moveElevatorDown() {
     return this.startEnd(() -> elevNeoMotor1.set(-.1), () -> elevNeoMotor1.set(0));
   }
-
   public Command elevatorCoast() {
     return this.runOnce(() -> {
       this.elevNeoMotor1.setIdleMode(IdleMode.kCoast);
