@@ -23,7 +23,9 @@ import frc.robot.classes.ModuleConfig;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
 import frc.robot.commands.OrbitalTarget;
+import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Feedback;
 import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
@@ -46,6 +48,7 @@ class CompetitionRobotContainer {
   private final Shooter m_Shooter;
   private final Wrist m_Wrist;
   private final Feeder m_feeder;
+  private final Feedback m_feedback;
   private final CommandXboxController m_driveController;
   private final CommandXboxController m_manipController;
   private final CommandXboxController sysIdController;
@@ -116,6 +119,8 @@ class CompetitionRobotContainer {
             RobotConstants.WRIST_ID, RobotConstants.WRIST_HIGH_LIM, RobotConstants.WRIST_LOW_LIM);
 
     m_feeder = new Feeder();
+
+    m_feedback = new Feedback(1);
 
     AutoBuilder.configureHolonomic(
         m_poseEstimator::getFusedPose, // Robot pose supplier
@@ -189,15 +194,13 @@ class CompetitionRobotContainer {
         .whileTrue(
             new OrbitalTarget(
                 m_chassis,
-                m_driveController::getLeftX,
-                m_driveController::getLeftY,
-                m_driveController::getRightX,
-                m_driveController::getLeftTriggerAxis,
-                m_driveController::getRightTriggerAxis,
+                m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.TRANSLATION_PID,
                 RobotConstants.ROTATION_PID,
-                RobotConstants.MOTION_LIMITS.maxSpeed,
-                m_poseEstimator));
+                RobotConstants.MOTION_LIMITS,
+                m_poseEstimator,
+                () -> Constants.ORBIT_RADIUS,
+                RobotConstants.ORBITAL_FF_CONSTANT));
     m_driveController
         .a()
         .or(m_driveController.b())

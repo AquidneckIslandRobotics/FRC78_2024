@@ -37,7 +37,7 @@ public class Robot extends LoggedRobot {
               CvSink cvSink = CameraServer.getVideo();
               CvSource outputStream =
                   CameraServer.putVideo(
-                      "blur", 640, 480); // Can edit camera resolution in ShuffleBoard
+                      "INTAKE CAMERA", 320, 240); // Can edit camera resolution in ShuffleBoard
 
               Mat source = new Mat();
               Mat output = new Mat();

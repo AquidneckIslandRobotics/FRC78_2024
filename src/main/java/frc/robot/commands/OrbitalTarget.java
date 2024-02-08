@@ -5,18 +5,21 @@
 package frc.robot.commands;
 
 import com.pathplanner.lib.util.PIDConstants;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.classes.Structs;
 import frc.robot.classes.Util;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class OrbitalTarget extends Command {
@@ -24,66 +27,54 @@ public class OrbitalTarget extends Command {
   private final Chassis chassis;
   private final PoseEstimator poseEstimator;
 
-  private final DoubleSupplier xSupplier;
-  private final DoubleSupplier ySupplier;
-  private final DoubleSupplier lTriggerSupplier;
-  private final DoubleSupplier rTriggerSupplier;
+  private final Translation2d speakerPose;
 
-  private final Translation2d targetPose;
+  private final Supplier<ChassisSpeeds> speedsSupplier;
+  private final ProfiledPIDController xController;
+  private final ProfiledPIDController yController;
+  private final ProfiledPIDController rotController;
+  private final double rotationFFCoefficient;
 
-  private final PIDController xController;
-  private final PIDController yController;
-  private final PIDController rotController;
+  private Rotation2d goalRotation;
 
-  private PIDConstants translationPID;
-  private PIDConstants rotationPID;
-  private double maxSpeed;
-
-  // Target pose in field space for the robot to move to
-  private double xTarget;
-  private double yTarget;
-  private double rotTarget;
-
-  // Essentially the polar coordinates of the robot relative to the target
-  private double targetRobotAngle;
-  private double orbitDistance;
-  private double lateralSpeed;
+  private DoubleSupplier orbitDistance;
 
   public OrbitalTarget(
       Chassis chassis,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier rotSupplier,
-      DoubleSupplier lTriggerSupplier,
-      DoubleSupplier rTriggerSupplier,
+      Supplier<ChassisSpeeds> speedsSupplier,
       PIDConstants translationPID,
       PIDConstants rotationPID,
-      double maxSpeed,
-      PoseEstimator poseEstimator) {
+      Structs.MotionLimits motionLimits,
+      PoseEstimator poseEstimator,
+      DoubleSupplier orbitDistance,
+      double rotationFFCoefficient) {
 
     this.chassis = chassis;
     this.poseEstimator = poseEstimator;
-    this.xSupplier = xSupplier;
-    this.ySupplier = ySupplier;
-    this.lTriggerSupplier = lTriggerSupplier;
-    this.rTriggerSupplier = rTriggerSupplier;
-    this.translationPID = translationPID;
-    this.rotationPID = rotationPID;
-    this.maxSpeed = maxSpeed;
+    this.speedsSupplier = speedsSupplier;
+    this.orbitDistance = orbitDistance;
+    this.rotationFFCoefficient = rotationFFCoefficient;
 
     // Might be shorter way of doing this
     if (DriverStation.getAlliance().isPresent()) {
-      targetPose =
+      speakerPose =
           DriverStation.getAlliance().get() == DriverStation.Alliance.Blue
               ? Constants.BLUE_ORBIT_POSE
               : Constants.RED_ORBIT_POSE;
     } else {
-      targetPose = Constants.BLUE_ORBIT_POSE;
+      speakerPose = Constants.BLUE_ORBIT_POSE;
     }
 
-    xController = new PIDController(translationPID.kP, translationPID.kI, translationPID.kD);
-    yController = new PIDController(translationPID.kP, translationPID.kI, translationPID.kD);
-    rotController = new PIDController(rotationPID.kP, rotationPID.kI, rotationPID.kD);
+    Constraints constraints = new Constraints(motionLimits.maxSpeed, motionLimits.maxAcceleration);
+    xController =
+        new ProfiledPIDController(
+            translationPID.kP, translationPID.kI, translationPID.kD, constraints);
+    yController =
+        new ProfiledPIDController(
+            translationPID.kP, translationPID.kI, translationPID.kD, constraints);
+    rotController =
+        new ProfiledPIDController(rotationPID.kP, rotationPID.kI, rotationPID.kD, constraints);
+
     rotController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(chassis);
@@ -91,69 +82,63 @@ public class OrbitalTarget extends Command {
 
   @Override
   public void initialize() {
-    targetRobotAngle =
-        Math.atan2(
-            poseEstimator.getFusedPose().getY() - targetPose.getY(),
-            poseEstimator.getFusedPose().getX() - targetPose.getX());
+    Pose2d robotPose = poseEstimator.getFusedPose();
+    xController.reset(robotPose.getX());
+    yController.reset(robotPose.getY());
+    rotController.reset(robotPose.getRotation().getRadians());
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // This first bit basically calculates polar coordinates for the robot with the target as the
-    // origin
-    // Change target orbit distance based on joystick input
+    Pose2d robotPose = poseEstimator.getFusedPose();
 
-    // orbitDistance = Constants.ORBIT_RADIUS + (ySupplier.getAsDouble() *
-    // Constants.ORBIT_RADIUS_MARGIN);
-    orbitDistance = Constants.ORBIT_RADIUS;
-    lateralSpeed =
-        Util.modifyJoystick(xSupplier.getAsDouble())
-            * maxSpeed
-            * Util.triggerAdjust(lTriggerSupplier.getAsDouble(), rTriggerSupplier.getAsDouble())
-            * 0.02;
-    targetRobotAngle = targetRobotAngle + (Math.asin(lateralSpeed / orbitDistance));
+    Translation2d goalPosition = robotPose.getTranslation().minus(speakerPose);
+    /*
+     * The goal rotation is the angle between the predicted position of the robot and the speaker.
+     * Predicted robot position is calculated by current position plus a vector perpendicular to the difference of the robot to the speaker,
+     * scaled by the speed of the robot and a constant for tuning
+     * Angle is taken from the difference of the speaker position and the predicted robot position
+     */
+    goalRotation =
+        speakerPose
+            .minus(
+                robotPose
+                    .getTranslation()
+                    .plus(
+                        Util.perpendicular(goalPosition)
+                            .times(
+                                speedsSupplier.get().vyMetersPerSecond
+                                    * 0.02
+                                    * rotationFFCoefficient)))
+            .getAngle();
 
-    // Then converts the polar coordinates to field coordinates
-    calcTargetPose();
-    Logger.recordOutput(
-        "Orbit Goal", new Pose2d(xTarget, yTarget, Rotation2d.fromRadians(rotTarget)));
+    /*  The goal position is normalized and scaled by the orbit distance, then added to the speaker
+    position to get a goal position that is radius distance away from the speaker in the direction of the robot*/
+    goalPosition = Util.normalize(goalPosition);
+    goalPosition = goalPosition.times(orbitDistance.getAsDouble());
+    goalPosition = goalPosition.plus(speakerPose);
 
-    // Then uses PID to move the robot to the target pose
-    xController.setSetpoint(xTarget);
-    yController.setSetpoint(yTarget);
-    rotController.setSetpoint(rotTarget);
+    xController.setGoal(goalPosition.getX());
+    yController.setGoal(goalPosition.getY());
+    rotController.setGoal(goalRotation.getRadians());
 
-    chassis.driveRobotRelative(
+    Logger.recordOutput("OrbitGoal", new Pose2d(goalPosition, goalRotation));
+
+    ChassisSpeeds speeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
             new ChassisSpeeds(
-                xController.calculate(poseEstimator.getFusedPose().getX()),
-                yController.calculate(poseEstimator.getFusedPose().getY()),
-                rotController.calculate(poseEstimator.getFusedPose().getRotation().getRadians())),
-            poseEstimator.getFusedPose().getRotation()));
+                xController.calculate(robotPose.getX()),
+                yController.calculate(robotPose.getY()),
+                rotController.calculate(robotPose.getRotation().getRadians())),
+            robotPose.getRotation());
+
+    speeds.vyMetersPerSecond += speedsSupplier.get().vyMetersPerSecond;
+
+    chassis.driveRobotRelative(speeds);
   }
 
   @Override
   public void end(boolean interrupted) {
     chassis.driveRobotRelative(new ChassisSpeeds());
-  }
-
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
-
-  public void calcTargetPose() {
-    xTarget = Math.cos(targetRobotAngle) * orbitDistance;
-    yTarget = Math.sin(targetRobotAngle) * orbitDistance;
-
-    xTarget += targetPose.getX();
-    yTarget += targetPose.getY();
-
-    rotTarget =
-        targetRobotAngle
-            + Math.PI; // Offset by 180 degrees to get robot-target angle as this is the angle the
-    // robot will be facing
-    rotTarget = rotTarget % (2 * Math.PI); // Wrap angle to [0, 2 * PI)
   }
 }

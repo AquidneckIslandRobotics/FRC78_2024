@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.classes.BaseDrive;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.commands.*;
+import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
@@ -133,15 +134,13 @@ class TestChassisContainer {
         .whileTrue(
             new OrbitalTarget(
                 m_chassis,
-                m_driveController::getLeftX,
-                m_driveController::getLeftY,
-                m_driveController::getRightX,
-                m_driveController::getLeftTriggerAxis,
-                m_driveController::getRightTriggerAxis,
+                m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.TRANSLATION_PID,
                 RobotConstants.ROTATION_PID,
-                RobotConstants.MOTION_LIMITS.maxSpeed,
-                m_poseEstimator));
+                RobotConstants.MOTION_LIMITS,
+                m_poseEstimator,
+                () -> Constants.ORBIT_RADIUS,
+                RobotConstants.ORBITAL_FF_CONSTANT));
     m_driveController
         .a()
         .or(m_driveController.b())

@@ -16,6 +16,6 @@ public final class Constants {
 
   public static final Translation2d BLUE_ORBIT_POSE = new Translation2d(0.5, 5.5);
   public static final Translation2d RED_ORBIT_POSE = new Translation2d(16, 5.5);
-  public static final double ORBIT_RADIUS = 2.5;
+  public static final double ORBIT_RADIUS = 2;
   public static final double ORBIT_RADIUS_MARGIN = 1.0;
 }
