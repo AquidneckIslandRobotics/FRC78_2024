@@ -16,9 +16,9 @@ public class Feeder extends SubsystemBase {
 
   /** Creates a new Feed. */
   public Feeder() {
-    feedMotor = new TalonFX(14);
+    feedMotor = new TalonFX(16);
     feedSensor = new TimeOfFlight(17);
-    feedSensor.setRangeOfInterest(-1, 1, 1, -1);
+    feedSensor.setRangeOfInterest(10, 10, 11, 11);
 
     // If no commands are using this subsystem, stop the motor
     setDefaultCommand(run(() -> feedMotor.set(0)));
@@ -29,7 +29,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public Command reverseFeed() {
-    return this.run(() -> feedMotor.set(-0.2));
+    return this.run(() -> feedMotor.set(-0.5));
   }
 
   public Command fire() {
@@ -37,7 +37,7 @@ public class Feeder extends SubsystemBase {
   }
 
   public boolean isNoteQueued() {
-    return feedSensor.getRange() <= 40;
+    return feedSensor.getRange() <= 125;
   }
 
   @Override

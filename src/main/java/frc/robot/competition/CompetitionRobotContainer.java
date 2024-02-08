@@ -50,6 +50,7 @@ class CompetitionRobotContainer {
   private final Feedback m_feedback;
   private final CommandXboxController m_driveController;
   private final CommandXboxController m_manipController;
+  private final CommandXboxController m_testController;
   private final CommandXboxController sysIdController;
   private final SendableChooser<Command> autoChooser;
 
@@ -72,6 +73,7 @@ class CompetitionRobotContainer {
 
     m_driveController = new CommandXboxController(0);
     m_manipController = new CommandXboxController(1);
+    m_testController = new CommandXboxController(2);
     // Put on port 5 because we only want to use this during tests
     sysIdController = new CommandXboxController(5);
 
@@ -228,25 +230,32 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_FF));
 
     m_manipController.y().whileTrue(m_Elevator.moveElevatorUp());
-    m_manipController.x().whileTrue(m_Elevator.moveElevatorDown());
+    //  m_manipController.x().whileTrue(m_Elevator.moveElevatorDown());
 
     m_manipController
         .leftTrigger(0.5)
         .whileTrue(m_Shooter.startShooter(500))
         .whileFalse(m_Shooter.stopCommand());
 
-    m_manipController.a().whileTrue(m_Wrist.moveWristUp());
+    // m_manipController.a().whileTrue(m_Wrist.moveWristUp());
+    // Manual wrist Movement
+    // m_manipController.b().whileTrue(m_Wrist.moveWristDown());
 
-    m_manipController.b().whileTrue(m_Wrist.moveWristDown());
+    m_testController.a().whileTrue(m_Wrist.setToTarget(90)).whileFalse(m_Wrist.setToTarget(130));
+
+    m_manipController
+        .y()
+        .whileTrue(m_Wrist.setToTarget(110).alongWith(m_Elevator.setToTarget(13.9))) // Sets to AMP
+        .whileFalse(m_Wrist.setToTarget(139).alongWith(m_Elevator.setToTarget(0))); // sets to STOW
+
+    m_manipController.x().whileTrue(m_Wrist.setToTarget(125)).whileFalse(m_Wrist.setToTarget(139));
 
     m_manipController
         .rightBumper()
         .whileTrue(
             m_intake.intakeCommand().alongWith(m_feeder.runFeed()).until(m_feeder::isNoteQueued));
 
-    m_manipController
-        .leftBumper()
-        .whileTrue(m_intake.outtakeCommand().alongWith(m_feeder.reverseFeed()));
+    m_manipController.leftBumper().whileTrue(m_feeder.reverseFeed());
 
     m_manipController.rightTrigger(0.5).whileTrue(m_feeder.fire());
 

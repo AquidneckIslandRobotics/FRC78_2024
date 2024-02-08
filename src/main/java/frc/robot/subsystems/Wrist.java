@@ -5,11 +5,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -20,6 +22,8 @@ public class Wrist extends SubsystemBase {
 
   private double highLim;
   private double lowLim;
+
+  private double stow;
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
@@ -32,6 +36,7 @@ public class Wrist extends SubsystemBase {
     encoder = wristNeo.getAbsoluteEncoder(Type.kDutyCycle);
     encoder.setPositionConversionFactor(360);
     wristNeo.getPIDController().setFeedbackDevice(encoder);
+    wristNeo.getPIDController().setP(.03);
 
     encoder.setInverted(true);
     encoder.setZeroOffset(340);
@@ -39,11 +44,13 @@ public class Wrist extends SubsystemBase {
     wristNeo.setSoftLimit(SoftLimitDirection.kForward, WRIST_HIGH_LIM);
     wristNeo.setSoftLimit(SoftLimitDirection.kReverse, WRIST_LOW_LIM);
 
-    wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
-    wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    wristNeo.enableSoftLimit(SoftLimitDirection.kForward, false);
+    wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, false);
 
     highLim = WRIST_HIGH_LIM;
     lowLim = WRIST_LOW_LIM;
+
+    stow = 130;
   }
 
   public void SetSpeed(double speed) {
@@ -68,6 +75,17 @@ public class Wrist extends SubsystemBase {
     }
   }
 
+  public void wristToPosition(double target) {
+    double currentWristPos = encoder.getPosition();
+    if (currentWristPos > target) {
+      wristNeo.set(-0.5);
+    } else if (currentWristPos < target) {
+      wristNeo.set(0.5);
+    } else {
+      wristNeo.set(0);
+    }
+  }
+
   public Command moveWristUp() {
     return this.startEnd(() -> wristNeo.set(.3), () -> wristNeo.set(0));
   }
@@ -76,8 +94,13 @@ public class Wrist extends SubsystemBase {
     return this.startEnd(() -> wristNeo.set(-.3), () -> wristNeo.set(0));
   }
 
+  public Command setToTarget(double target) {
+    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("currentPosWrist", encoder.getPosition());
   }
 }
