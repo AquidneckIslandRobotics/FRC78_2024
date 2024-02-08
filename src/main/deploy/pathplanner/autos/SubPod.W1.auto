@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4376744281438871,
-      "y": 5.566684809560096
+      "x": 1.2493535082308265,
+      "y": 4.229742249960691
     },
-    "rotation": 180.0
+    "rotation": 132.455195620187
   },
   "command": {
     "type": "sequential",
@@ -14,13 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center.CenterNote"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CenterNote.StageNote"
+            "pathName": "SourceSide.SpeakerNote"
           }
         }
       ]

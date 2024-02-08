@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4376744281438871,
-      "y": 5.566684809560096
+      "x": 1.2649902633138603,
+      "y": 6.637802532747923
     },
-    "rotation": 180.0
+    "rotation": -135.70731936854423
   },
   "command": {
     "type": "sequential",
@@ -14,13 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Center.CenterNote"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CenterNote.StageNote"
+            "pathName": "AmpSide.AmpNote"
           }
         }
       ]

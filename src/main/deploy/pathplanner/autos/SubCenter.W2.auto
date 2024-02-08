@@ -12,15 +12,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "Center.CenterNote"
+            "commands": []
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CenterNote.StageNote"
+            "pathName": "Center.CenterNote"
           }
         }
       ]
