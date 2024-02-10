@@ -12,11 +12,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
 import frc.robot.classes.ModuleConfig;
@@ -266,6 +270,19 @@ class CompetitionRobotContainer {
     sysIdController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
     sysIdController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
     sysIdController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
+
+    new Trigger(m_feeder::isNoteQueued)
+        .onTrue(shortRumble(m_driveController.getHID()))
+        .onFalse(shortRumble(m_driveController.getHID()));
+
+    new Trigger(m_Shooter::upToSpeed).onTrue(shortRumble(m_manipController.getHID()));
+  }
+
+  private Command shortRumble(XboxController controller) {
+    return Commands.runOnce(() -> controller.setRumble(GenericHID.RumbleType.kBothRumble, 1))
+        .andThen(Commands.waitSeconds(.3))
+        .andThen(
+            Commands.runOnce(() -> controller.setRumble(GenericHID.RumbleType.kBothRumble, 0)));
   }
 
   public Command getAutonomousCommand() {

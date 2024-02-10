@@ -55,6 +55,13 @@ public class Shooter extends SubsystemBase {
     shooterBottomVV = new VelocityVoltage(0).withSlot(0);
   }
 
+  /**
+   * @return true if motor velocity is 90% of its setpoint
+   */
+  public boolean upToSpeed() {
+    return shooterTOP.getVelocity().getValueAsDouble() > shooterTopVV.Velocity * .9;
+  }
+
   public void setPIDReferenceTOP(double setPoint) {
     shooterTOP.setControl(
         shooterTopVV.withVelocity(setPoint / 60).withFeedForward(config.FLYWHEEL_TOP_FF));
