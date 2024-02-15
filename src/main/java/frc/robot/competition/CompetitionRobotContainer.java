@@ -127,8 +127,7 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setShooter(RobotConstants.AUTO_SHOOT_SPEED));
     NamedCommands.registerCommand(
-        "SetWrist", m_Shooter.setShooter(RobotConstants.AUTO_WRIST_SETPOINT));
-    NamedCommands.registerCommand("RunIntake", m_intake.intakeCommand());
+        "SetWrist", m_Wrist.setToTarget(RobotConstants.AUTO_WRIST_SETPOINT));
     NamedCommands.registerCommand(
         "Score",
         m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
