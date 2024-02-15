@@ -126,11 +126,15 @@ class CompetitionRobotContainer {
             .alongWith(m_Wrist.setToTarget(RobotConstants.WRIST_W2_TARGET)));
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setShooter(RobotConstants.AUTO_SHOOT_SPEED));
-    NamedCommands.registerCommand(
-        "SetWrist", m_Wrist.setToTarget(RobotConstants.AUTO_WRIST_SETPOINT));
+    NamedCommands.registerCommand("SetWrist", m_Wrist.setToTarget(38));
     NamedCommands.registerCommand(
         "Score",
-        m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
+        m_feeder
+            .setFeed(RobotConstants.FEED_FIRE_SPEED)
+            .until(
+                () ->
+                    !m_feeder
+                        .isNoteQueued())); // Need  to add and then to stop the feed and shooter
 
     AutoBuilder.configureHolonomic(
         m_poseEstimator::getFusedPose, // Robot pose supplier
