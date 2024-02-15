@@ -30,16 +30,16 @@ public class Intake extends SubsystemBase {
   }
 
   /* intake speed is same for top and bottom */
-  public void intakeControl(double speed) {
+  public void setIntake(double speed) {
     intakeTop.set(speed);
     intakeBottom.set(speed);
   }
 
   public Command intakeCommand() {
-    return this.startEnd(() -> this.intakeControl(intakeSpeed), () -> this.intakeControl(0));
+    return this.startEnd(() -> this.setIntake(intakeSpeed), () -> this.setIntake(0));
   }
 
   public Command outtakeCommand() {
-    return this.startEnd(() -> this.intakeControl(outtakeSpeed), () -> this.intakeControl(0));
+    return this.startEnd(() -> this.setIntake(outtakeSpeed), () -> this.setIntake(0));
   }
 }

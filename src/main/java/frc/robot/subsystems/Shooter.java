@@ -8,9 +8,12 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.classes.Structs.FFConstants;
+import frc.robot.classes.Structs.Range;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
 
@@ -25,44 +28,48 @@ public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   public Shooter(ShooterConfig config) {
     this.config = config;
-    shooterTOP = new TalonFX(config.FLYWHEEL_TOP_ID);
-    shooterBOTTOM = new TalonFX(config.FLYWHEEL_BOTTOM_ID);
+    shooterTOP = new TalonFX(config.flywheelTopID);
+    shooterBOTTOM = new TalonFX(config.flywheelBottomID);
 
     shooterTOP.getConfigurator().apply(new TalonFXConfiguration());
     shooterBOTTOM.getConfigurator().apply(new TalonFXConfiguration());
 
-    var shooterTopConfigs = new Slot0Configs();
-    shooterTOP.setInverted(true);
-    shooterTopConfigs.kS = config.FLYWHEEL_TOP_S;
-    shooterTopConfigs.kV = config.FLYWHEEL_TOP_V;
-    shooterTopConfigs.kP = config.FLYWHEEL_TOP_P;
-    shooterTopConfigs.kI = config.FLYWHEEL_TOP_I;
-    shooterTopConfigs.kD = config.FLYWHEEL_TOP_D;
+    var shooterTopConfig = new Slot0Configs();
+    shooterTOP.setInverted(config.flywheelTopInverted);
+    shooterTopConfig.kS = config.flywheelTopFF.kS;
+    shooterTopConfig.kV = config.flywheelTopFF.kV;
+    shooterTopConfig.kP = config.flywheelTopPID.kP;
+    shooterTopConfig.kI = config.flywheelTopPID.kI;
+    shooterTopConfig.kD = config.flywheelTopPID.kD;
 
-    shooterTOP.getConfigurator().apply(shooterTopConfigs);
+    shooterTOP.getConfigurator().apply(shooterTopConfig);
 
-    var shooterBottomConfigs = new Slot0Configs();
-    shooterBOTTOM.setInverted(true);
-    shooterBottomConfigs.kS = config.FLYWHEEL_BOTTOM_S;
-    shooterBottomConfigs.kV = config.FLYWHEEL_BOTTOM_V;
-    shooterBottomConfigs.kP = config.FLYWHEEL_BOTTOM_P;
-    shooterBottomConfigs.kI = config.FLYWHEEL_BOTTOM_I;
-    shooterBottomConfigs.kD = config.FLYWHEEL_BOTTOM_D;
+    var shooterBottomConfig = new Slot0Configs();
+    shooterBOTTOM.setInverted(config.flywheelBottomInverted);
+    shooterBottomConfig.kS = config.flywheelBottomFF.kS;
+    shooterBottomConfig.kV = config.flywheelBottomFF.kV;
+    shooterBottomConfig.kP = config.flywheelBottomPID.kP;
+    shooterBottomConfig.kI = config.flywheelBottomPID.kI;
+    shooterBottomConfig.kD = config.flywheelBottomPID.kD;
 
-    shooterBOTTOM.getConfigurator().apply(shooterBottomConfigs);
+    shooterBOTTOM.getConfigurator().apply(shooterBottomConfig);
 
     shooterTopVV = new VelocityVoltage(0).withSlot(0);
     shooterBottomVV = new VelocityVoltage(0).withSlot(0);
   }
 
+  public boolean isAtSpeed(double threshold) {
+    return (shooterTOP.getVelocity().getValueAsDouble() >= shooterTopVV.Velocity * threshold);
+  }
+
   public void setPIDReferenceTOP(double setPoint) {
     shooterTOP.setControl(
-        shooterTopVV.withVelocity(setPoint / 60).withFeedForward(config.FLYWHEEL_TOP_FF));
+        shooterTopVV.withVelocity(setPoint / 60).withFeedForward(config.flywheelTopFF.kFF));
   }
 
   public void setPIDReferenceBOTTOM(double setPoint) {
     shooterBOTTOM.setControl(
-        shooterBottomVV.withVelocity(setPoint / 60).withFeedForward(config.FLYWHEEL_BOTTOM_FF));
+        shooterBottomVV.withVelocity(setPoint / 60).withFeedForward(config.flywheelTopFF.kFF));
   }
 
   public void setPIDReferenceBOTH(double setPoint) {
@@ -70,57 +77,50 @@ public class Shooter extends SubsystemBase {
     setPIDReferenceBOTTOM(setPoint);
   }
 
-  public void shooterSTOP() {
-    shooterTOP.set(0);
-    shooterBOTTOM.set(0);
-  }
-
-  public Command startShooter(double setPoint) {
+  public Command setShooter(double setPoint) {
     return this.runOnce(() -> this.setPIDReferenceBOTH(setPoint));
-  }
-
-  public Command stopCommand() {
-    return this.runOnce(this::shooterSTOP);
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-    SmartDashboard.putNumber("TOP SetPoint", shooterTOP.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("BOTTOM SetPoint", shooterBOTTOM.getVelocity().getValueAsDouble());
+    // TODO is this reading velocity encoder or the setting velocity?
+    Logger.recordOutput("Shooter Top", shooterTOP.getVelocity().getValueAsDouble());
+    Logger.recordOutput("Shooter Bottom", shooterBOTTOM.getVelocity().getValueAsDouble());
   }
 
   public static class ShooterConfig {
-    // SHOOTER
+    public final int flywheelTopID;
+    public final int flywheelBottomID;
+    public final Boolean flywheelTopInverted;
+    public final Boolean flywheelBottomInverted;
+    public final Range flywheelTopMinMax;
+    public final Range flywheelBottomMinMax;
+    public final PIDConstants flywheelTopPID;
+    public final PIDConstants flywheelBottomPID;
+    public final FFConstants flywheelTopFF;
+    public final FFConstants flywheelBottomFF;
 
-    public int FLYWHEEL_TOP_ID;
-    public int FLYWHEEL_BOTTOM_ID;
-
-    // Constants - TOP FLYWHEEL
-    public double FLYWHEEL_TOP_MIN;
-    public double FLYWHEEL_TOP_MAX;
-    // PID Consants - TOP FLYWHEEL
-    public double FLYWHEEL_TOP_P;
-    public double FLYWHEEL_TOP_I;
-    public double FLYWHEEL_TOP_D;
-
-    public double FLYWHEEL_TOP_S;
-    public double FLYWHEEL_TOP_V;
-    public double FLYWHEEL_TOP_FF;
-
-    // Constants - BOTTOM FLYWHEEL
-    public double FLYWHEEL_BOTTOM_MIN;
-    public double FLYWHEEL_BOTTOM_MAX;
-    // PID Constants - BOTTOM FLYWHEEL
-    public double FLYWHEEL_BOTTOM_P;
-    public double FLYWHEEL_BOTTOM_I;
-    public double FLYWHEEL_BOTTOM_D;
-
-    public double FLYWHEEL_BOTTOM_S;
-    public double FLYWHEEL_BOTTOM_V;
-    public double FLYWHEEL_BOTTOM_FF;
-
-    /** Hood's angle of elevation in degrees */
-    public double HOOD_ANGLE;
+    public ShooterConfig(
+        int flywheelTopID,
+        int flywheelBottomID,
+        Boolean flywheelTopInverted,
+        Boolean flywheelBottomInverted,
+        Range flywheelTopMinMax,
+        Range flywheelBottomMinMax,
+        PIDConstants flywheelTopPID,
+        PIDConstants flywheelBottomPID,
+        FFConstants flywheelTopFF,
+        FFConstants flywheelBottomFF) {
+      this.flywheelTopID = flywheelTopID;
+      this.flywheelBottomID = flywheelBottomID;
+      this.flywheelTopInverted = flywheelTopInverted;
+      this.flywheelBottomInverted = flywheelBottomInverted;
+      this.flywheelTopMinMax = flywheelTopMinMax;
+      this.flywheelBottomMinMax = flywheelBottomMinMax;
+      this.flywheelTopPID = flywheelTopPID;
+      this.flywheelBottomPID = flywheelBottomPID;
+      this.flywheelTopFF = flywheelTopFF;
+      this.flywheelBottomFF = flywheelBottomFF;
+    }
   }
 }

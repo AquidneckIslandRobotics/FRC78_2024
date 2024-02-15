@@ -11,14 +11,15 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Wrist extends SubsystemBase {
 
   private CANSparkMax wristNeo;
   private AbsoluteEncoder encoder;
+  private double stowPos = 50;
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
@@ -34,24 +35,24 @@ public class Wrist extends SubsystemBase {
     wristNeo.getPIDController().setP(.03);
 
     encoder.setInverted(true);
-    encoder.setZeroOffset(340);
+    encoder.setZeroOffset(0);
 
     wristNeo.setSoftLimit(SoftLimitDirection.kForward, WRIST_HIGH_LIM);
     wristNeo.setSoftLimit(SoftLimitDirection.kReverse, WRIST_LOW_LIM);
 
-    wristNeo.enableSoftLimit(SoftLimitDirection.kForward, false);
-    wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, false);
+    wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
+    wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
-    this.setDefaultCommand(setToTarget(139));
+    this.setDefaultCommand(setToTarget(WRIST_HIGH_LIM));
   }
 
   public Command setToTarget(double target) {
-    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
+    return run(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("currentPosWrist", encoder.getPosition());
+    Logger.recordOutput("Wrist Enc Pos", encoder.getPosition());
   }
 }
