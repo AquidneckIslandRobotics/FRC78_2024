@@ -104,7 +104,7 @@ public class Elevator extends SubsystemBase {
   public Command zeroElevator() {
     return lowerElevatorUntilLimitReached()
         .andThen(configureMotorsAfterZeroing())
-        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming).withName("ZeroElevator");
   }
 
   /** Manually move elevator up by gradually moving the setpoint. */
@@ -153,6 +153,6 @@ public class Elevator extends SubsystemBase {
                               MetersPerSecond.of(profiledPid.getSetpoint().velocity)
                                   .in(InchesPerSecond));
                   elevNeoMotor1.setVoltage(appliedOutput);
-                }));
+                })).withName("MoveElevator[" + target + "]");
   }
 }

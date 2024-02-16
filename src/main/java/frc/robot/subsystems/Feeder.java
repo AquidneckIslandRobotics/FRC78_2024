@@ -28,7 +28,8 @@ public class Feeder extends SubsystemBase {
   }
 
   public Command setFeed(double speed) {
-    return startEnd(() -> feedMotor.set(speed), () -> feedMotor.set(0));
+    return startEnd(() -> feedMotor.set(speed), () -> feedMotor.set(0))
+        .withName("setFeed[" + speed + "]");
   }
 
   public boolean isNoteQueued() {

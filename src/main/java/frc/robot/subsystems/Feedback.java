@@ -23,11 +23,12 @@ public class Feedback extends SubsystemBase {
 
   public Command multi(Color color) {
     return this.runOnce(
-        () ->
-            bracelet.setLEDs(
-                ((int) (color.red * 255)),
-                ((int) (color.green * 255)),
-                ((int) (color.blue * 255))));
+            () ->
+                bracelet.setLEDs(
+                    ((int) (color.red * 255)),
+                    ((int) (color.green * 255)),
+                    ((int) (color.blue * 255))))
+        .withName("CANdle[" + color.toHexString() + "]");
   }
 
   public void off() {

@@ -52,6 +52,8 @@ public class FieldOrientedWithCardinal extends Command {
         new SimpleMotorFeedforward(ffConstants.kS, ffConstants.kV, ffConstants.kA); // TODO tune
 
     addRequirements(chassis);
+
+    setName("FieldOrientedDriveWithCardinal");
   }
 
   @Override

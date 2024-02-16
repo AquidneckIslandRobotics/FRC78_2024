@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +28,22 @@ public class Intake extends SubsystemBase {
 
     this.intakeSpeed = intakeSpeed;
     this.outtakeSpeed = outtakeSpeed;
+
+    // Built-in encoder position - UNUSED
+    intakeTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 65535);
+    intakeBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 65535);
+    // Analog Sensor - UNUSED
+    intakeTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 65535);
+    intakeBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 65535);
+    // Alternate Encoder - UNUSED
+    intakeTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 65535);
+    intakeBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 65535);
+    // Absolute Encoder - UNUSED
+    intakeTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 65535);
+    intakeBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 65535);
+    // Absolute Encoder - UNUSED
+    intakeTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 65535);
+    intakeBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 65535);
   }
 
   /* intake speed is same for top and bottom */
@@ -36,7 +53,8 @@ public class Intake extends SubsystemBase {
   }
 
   public Command intakeCommand() {
-    return this.startEnd(() -> this.setIntake(intakeSpeed), () -> this.setIntake(0));
+    return this.startEnd(() -> this.setIntake(intakeSpeed), () -> this.setIntake(0))
+        .withName("Intake");
   }
 
   public Command outtakeCommand() {

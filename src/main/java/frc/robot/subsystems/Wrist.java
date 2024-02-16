@@ -47,11 +47,12 @@ public class Wrist extends SubsystemBase {
 
   public Command setToTarget(double target) {
     this.target = target;
-    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
+    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition))
+        .withName("MoveWrist[" + target + "]");
   }
 
   public Command stow() {
-    return setToTarget(stowPos);
+    return setToTarget(stowPos).withName("Stow");
   }
 
   public boolean isAtTarget() {

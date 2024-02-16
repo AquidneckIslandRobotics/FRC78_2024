@@ -27,6 +27,8 @@ public class BaseDrive {
   private final SlewRateLimiter yLimiter;
   private final SlewRateLimiter thetaLimiter;
 
+  private final ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+
   public BaseDrive(
       XboxController controller, Structs.MotionLimits motionLimits, Structs.RateLimits rateLimits) {
     this.controller = controller;
@@ -35,8 +37,8 @@ public class BaseDrive {
     this.xSupplier = () -> -controller.getLeftY();
     this.ySupplier = () -> -controller.getLeftX();
     this.rotSupplier = () -> -controller.getRightX();
-    this.lTriggerSupplier = () -> controller.getLeftTriggerAxis();
-    this.rTriggerSupplier = () -> controller.getRightTriggerAxis();
+    this.lTriggerSupplier = controller::getLeftTriggerAxis;
+    this.rTriggerSupplier = controller::getRightTriggerAxis;
 
     xLimiter = new SlewRateLimiter(rateLimits.translationRateLimit);
     yLimiter = new SlewRateLimiter(rateLimits.translationRateLimit);
@@ -57,6 +59,9 @@ public class BaseDrive {
     double rot =
         thetaLimiter.calculate(Util.modifyJoystick(rotSupplier.getAsDouble()) * angularSpeed);
 
-    return new ChassisSpeeds(x, y, rot);
+    chassisSpeeds.vxMetersPerSecond = x;
+    chassisSpeeds.vyMetersPerSecond = y;
+    chassisSpeeds.omegaRadiansPerSecond = rot;
+    return chassisSpeeds;
   }
 }

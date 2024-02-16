@@ -78,6 +78,8 @@ public class OrbitalTarget extends Command {
     rotController.enableContinuousInput(-Math.PI, Math.PI);
 
     addRequirements(chassis);
+
+    setName("OrbitalTarget");
   }
 
   @Override

@@ -127,7 +127,7 @@ class CompetitionRobotContainer {
         m_intake
             .intakeCommand()
             .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
-            .until(m_feeder::isNoteQueued);
+            .until(m_feeder::isNoteQueued).withName("PickUpNote");
 
     NamedCommands.registerCommand("Intake", pickUpNote);
     NamedCommands.registerCommand(

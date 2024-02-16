@@ -23,6 +23,8 @@ public class FieldOrientedDrive extends Command {
     this.speeds = speeds;
 
     addRequirements(chassis);
+
+    setName("FieldOrientedDrive");
   }
 
   // Called every time the scheduler runs while the command is scheduled.

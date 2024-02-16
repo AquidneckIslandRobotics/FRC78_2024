@@ -9,6 +9,7 @@ import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -17,6 +18,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
@@ -54,6 +56,7 @@ public class Robot extends LoggedRobot {
     visionThread.start();
 
     if (isReal()) {
+      DataLogManager.start();
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
     } else {
       setUseTiming(false); // Run as fast as possible
@@ -67,6 +70,7 @@ public class Robot extends LoggedRobot {
     }
 
     Logger.start();
+    URCL.start();
     m_robotContainer = new CompetitionRobotContainer();
   }
 

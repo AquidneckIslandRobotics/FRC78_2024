@@ -79,7 +79,8 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setShooter(double setPoint) {
-    return this.runOnce(() -> this.setPIDReferenceBOTH(setPoint));
+    return this.runOnce(() -> this.setPIDReferenceBOTH(setPoint))
+        .withName("SetShooter@" + setPoint);
   }
 
   @Override
