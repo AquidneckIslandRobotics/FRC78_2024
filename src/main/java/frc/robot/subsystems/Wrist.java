@@ -8,6 +8,7 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
+import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
@@ -43,6 +44,17 @@ public class Wrist extends SubsystemBase {
 
     wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
+
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 20);
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 20);
+    // Motor Position - UNUSED
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 20);
+    // Analog Sensor - UNUSED
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 65535);
+    // Alternate Encoder - UNUSED
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 65535);
+    // Absolute Encoder Position
+    wristNeo.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 20);
   }
 
   public Command setToTarget(double target) {
