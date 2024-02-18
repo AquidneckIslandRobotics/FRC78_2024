@@ -142,7 +142,7 @@ class CompetitionRobotContainer {
         "Score",
         m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
     NamedCommands.registerCommand("StopShooter", m_Shooter.setShooter(0));
-    // Need  to add and then to stop the feed and shooter
+    // Need to add and then to stop the feed and shooter
 
     AutoBuilder.configureHolonomic(
         m_poseEstimator::getFusedPose, // Robot pose supplier
@@ -258,7 +258,15 @@ class CompetitionRobotContainer {
 
     m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());
 
-    m_manipController.rightBumper().whileTrue(pickUpNote);
+    m_manipController
+        .rightBumper()
+        .whileTrue(
+            m_intake
+                .intakeCommand()
+                .onlyWhile(m_Elevator::elevatorIsStowed)
+                .onlyWhile(m_feeder::isNoteNotQueued)
+                .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
+                .until(m_feeder::isNoteQueued));
 
     m_manipController.leftBumper().whileTrue(m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
 

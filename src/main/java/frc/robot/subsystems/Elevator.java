@@ -83,6 +83,10 @@ public class Elevator extends SubsystemBase {
     this.setDefaultCommand(setToTarget(0));
   }
 
+  public boolean elevatorIsStowed() {
+    return encoder.getPosition() <= .5;
+  }
+
   private Command lowerElevatorUntilLimitReached() {
     return run(() -> elevNeoMotor1.set(-.1)).until(() -> !reverseLimitSwitch.get());
   }

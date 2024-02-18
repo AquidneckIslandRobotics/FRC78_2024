@@ -35,6 +35,10 @@ public class Feeder extends SubsystemBase {
     return feedSensor.getRange() <= sensorThreshold;
   }
 
+  public boolean isNoteNotQueued() {
+    return feedSensor.getRange() > sensorThreshold;
+  }
+
   @Override
   public void periodic() {
     Logger.recordOutput("Feed Sensor", feedSensor.getRange());
