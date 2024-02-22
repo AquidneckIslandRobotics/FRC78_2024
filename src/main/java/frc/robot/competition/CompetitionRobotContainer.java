@@ -44,6 +44,8 @@ import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
+import edu.wpi.first.math.geometry.Rotation2d;
+
 
 class CompetitionRobotContainer {
   public final Chassis m_chassis;
@@ -261,6 +263,11 @@ class CompetitionRobotContainer {
         .and(m_Elevator::hasNotBeenZeroed)
         .onTrue(m_Elevator.zeroElevator());
 
+     RobotModeTriggers.autonomous()
+        .negate() // Trigger when the robot transitions out of disabnled mode
+        .and(() -> !m_Wrist.hasNotBeenStowed()) 
+        .onTrue(m_Wrist.stow());
+    
     m_manipController
         .leftTrigger(0.5)
         .whileTrue(m_Shooter.setShooter(4250))
@@ -289,9 +296,10 @@ class CompetitionRobotContainer {
     sysIdController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
     sysIdController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
     sysIdController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
-  }
+     }
 
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
+     public Command getAutonomousCommand() {
+        return autoChooser.getSelected();
+      }
 }
+ 
