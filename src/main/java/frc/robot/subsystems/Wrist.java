@@ -21,6 +21,11 @@ public class Wrist extends SubsystemBase {
   private AbsoluteEncoder encoder;
   private double stowPos = 50;
   private double target = 0;
+  private boolean stowed = false;
+
+  public boolean hasNotBeenStowed() {
+    return !stowed;
+  }
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
