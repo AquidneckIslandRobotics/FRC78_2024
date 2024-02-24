@@ -70,7 +70,10 @@ class TestChassisContainer {
 
 
     NamedCommands.registerCommand(
-        "AutoDetector", m_chassis.turnToNoteCommand());
+        "NoteDetector", m_chassis.turnToNoteCommand());
+    
+    NamedCommands.registerCommand(
+        "MovetoNote", m_chassis.moveToNoteCommand());
 
 
     m_baseDrive =

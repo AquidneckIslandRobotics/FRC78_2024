@@ -24,10 +24,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "AutoDetector"
+                  "name": null
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "MovetoNote"
           }
         }
       ]
