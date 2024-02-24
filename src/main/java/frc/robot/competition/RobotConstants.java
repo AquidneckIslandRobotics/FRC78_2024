@@ -48,18 +48,22 @@ class RobotConstants {
     }
   }
 
+  public static final PhotonCamera CAMS[] = {
+    new PhotonCamera("Arducam_OV9281_USB_Camera"), new PhotonCamera("Arducam_OV9281_USB_Camera (1)")
+  };
+
   public static final PhotonPoseEstimator PHOTON_POSE_ESTIMATORS[] = {
     new PhotonPoseEstimator(
         APRIL_TAG_FIELD_LAYOUT,
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        new PhotonCamera("Arducam_OV9281_USB_Camera"),
+        CAMS[0],
         new Transform3d(
             new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
             new Rotation3d(0, Math.toRadians(-30), 0))),
     new PhotonPoseEstimator(
         APRIL_TAG_FIELD_LAYOUT,
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        new PhotonCamera("Arducam_OV9281_USB_Camera (1)"),
+        CAMS[1],
         new Transform3d(
             new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
             new Rotation3d(0, Math.toRadians(50), 0)))

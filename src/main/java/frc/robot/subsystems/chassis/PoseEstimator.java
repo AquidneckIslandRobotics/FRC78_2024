@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 /** Add your docs here. */
 public class PoseEstimator {
@@ -32,6 +32,7 @@ public class PoseEstimator {
   private Pose2d lastPose;
   private Pigeon2 pigeon;
   private PhotonPoseEstimator photonEstimators[];
+  private PhotonCamera photonCams[];
   private AprilTagFieldLayout aprilTagFieldLayout;
 
   private double lastEstTimestamp = 0;
@@ -42,6 +43,7 @@ public class PoseEstimator {
   public PoseEstimator(
       Chassis chassis,
       PhotonPoseEstimator[] photonEstimators,
+      PhotonCamera[] photonCams,
       int pigeonId,
       Matrix<N3, N1> stateStdDevs,
       Matrix<N3, N1> visionStdDevs,
@@ -51,6 +53,7 @@ public class PoseEstimator {
     this.photonEstimators = photonEstimators;
     this.singleTagStdDevs = singleTagStdDevs;
     this.multiTagStdDevs = multiTagStdDevs;
+    this.photonCams = photonCams;
 
     pigeon = new Pigeon2(pigeonId);
 
@@ -75,19 +78,22 @@ public class PoseEstimator {
   }
 
   public void update() {
-    Optional<EstimatedRobotPose> estimatedPose = getEstimatedVisionPose();
+    for (int i = 0; i < photonEstimators.length; i++) {
+      Optional<EstimatedRobotPose> estimatedPose =
+          getEstimatedVisionPose(photonEstimators[i], photonCams[i]);
 
-    estimatedPose.ifPresent(
-        est -> {
-          var estPose = est.estimatedPose.toPose2d();
-          // Change our trust in the measurement based on the tags we can see
-          var estStdDevs = getEstimationStdDevs(estPose);
+      estimatedPose.ifPresent(
+          (EstimatedRobotPose est) -> {
+            var estPose = est.estimatedPose.toPose2d();
+            // Change our trust in the measurement based on the tags we can see
+            var estStdDevs = getEstimationStdDevs(estPose, photonEstimators[i], photonCams[i]);
 
-          poseEstimator.addVisionMeasurement(
-              est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+            poseEstimator.addVisionMeasurement(
+                est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
 
-          Logger.recordOutput("AT Estimate", estimatedPose.get().estimatedPose.toPose2d());
-        });
+            Logger.recordOutput("AT Estimate", estimatedPose.get().estimatedPose.toPose2d());
+          });
+    }
 
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRot()), chassis.getPositions());
     Pose2d currentPose = poseEstimator.getEstimatedPosition();
@@ -103,9 +109,10 @@ public class PoseEstimator {
     Logger.recordOutput("Estimated Velocity", getEstimatedVel());
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedVisionPose(PhotonPoseEstimator photonEstimator) {
-    var visionEst = photonEstimator.update();
-    double latestTimestamp = visionEst.;
+  public Optional<EstimatedRobotPose> getEstimatedVisionPose(
+      PhotonPoseEstimator est, PhotonCamera cam) {
+    var visionEst = est.update();
+    double latestTimestamp = cam.getLatestResult().getTimestampSeconds();
     boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
 
     if (newResult) lastEstTimestamp = latestTimestamp;
@@ -120,17 +127,14 @@ public class PoseEstimator {
     return vel.div(0.02); // How consistent is this update rate?
   }
 
-  public PhotonPipelineResult getLatestResult(PhotonPoseEstimator photonEstimator) {
-    return ;
-  }
-
-  public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
+  public Matrix<N3, N1> getEstimationStdDevs(
+      Pose2d estimatedPose, PhotonPoseEstimator est, PhotonCamera cam) {
     var estStdDevs = singleTagStdDevs;
-    var targets = getLatestResult().getTargets();
+    var targets = cam.getLatestResult().getTargets();
     int numTags = 0;
     double avgDist = 0;
     for (var tgt : targets) {
-      var tagPose = photonEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+      var tagPose = est.getFieldTags().getTagPose(tgt.getFiducialId());
       if (tagPose.isEmpty()) continue;
       numTags++;
       avgDist +=
