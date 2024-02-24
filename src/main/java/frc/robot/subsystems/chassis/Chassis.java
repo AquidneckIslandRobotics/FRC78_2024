@@ -95,9 +95,6 @@ public class Chassis extends SubsystemBase {
     double errorx = 0 - x;
     double errory = 0 + y;
 
-    double rotation = errorx * rotationSpeed;
-    double movement = errory * movementSpeed;
-
   }
 
   
