@@ -265,7 +265,7 @@ class CompetitionRobotContainer {
 
      RobotModeTriggers.autonomous()
         .negate() // Trigger when the robot transitions out of disabnled mode
-        .and(() -> !m_Wrist.hasNotBeenStowed()) 
+        .and(() -> m_Wrist.hasNotBeenStowed()) 
         .onTrue(m_Wrist.stow());
     
     m_manipController
