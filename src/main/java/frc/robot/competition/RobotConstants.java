@@ -8,6 +8,8 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -21,6 +23,9 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.classes.Structs.*;
 import frc.robot.subsystems.Shooter.ShooterConfig;
+import java.io.IOException;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
 
 /** This is the constants for the NEO */
 class RobotConstants {
@@ -32,10 +37,33 @@ class RobotConstants {
 
   public static final int PIGEON_ID = 0;
 
-  public static final String AT_CAMERA_NAME = "NULL";
-  public static final Transform3d CAM1_OFFSET =
-      new Transform3d(
-          new Translation3d(0.31, 0.0, 0.15), new Rotation3d(0, Math.toRadians(-15), 0)); // TODO
+  public static AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT;
+
+  static {
+    try {
+      APRIL_TAG_FIELD_LAYOUT =
+          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static final PhotonPoseEstimator PHOTON_POSE_ESTIMATORS[] = {
+    new PhotonPoseEstimator(
+        APRIL_TAG_FIELD_LAYOUT,
+        PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        new PhotonCamera("Arducam_OV9281_USB_Camera"),
+        new Transform3d(
+            new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
+            new Rotation3d(0, Math.toRadians(-30), 0))),
+    new PhotonPoseEstimator(
+        APRIL_TAG_FIELD_LAYOUT,
+        PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+        new PhotonCamera("Arducam_OV9281_USB_Camera (1)"),
+        new Transform3d(
+            new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
+            new Rotation3d(0, Math.toRadians(50), 0)))
+  };
 
   public static final Matrix<N3, N1> STATE_STD_DEVS = VecBuilder.fill(0.1, 0.1, 0.1); // TODO
   public static final Matrix<N3, N1> VISION_STD_DEVS = VecBuilder.fill(1, 1, 1.5);

@@ -13,7 +13,6 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,9 +20,7 @@ import java.io.IOException;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 /** Add your docs here. */
@@ -33,30 +30,25 @@ public class PoseEstimator {
   private final SwerveDrivePoseEstimator poseEstimator;
   private Transform2d vel;
   private Pose2d lastPose;
-  private PhotonCamera ATCam1;
   private Pigeon2 pigeon;
-  private PhotonPoseEstimator photonEstimator;
+  private PhotonPoseEstimator photonEstimators[];
   private AprilTagFieldLayout aprilTagFieldLayout;
 
   private double lastEstTimestamp = 0;
 
   private final Matrix<N3, N1> singleTagStdDevs;
   private final Matrix<N3, N1> multiTagStdDevs;
-  private final Transform3d robotToCam;
 
   public PoseEstimator(
       Chassis chassis,
-      PhotonCamera ATCam1,
-      Transform3d cam1Offset,
+      PhotonPoseEstimator[] photonEstimators,
       int pigeonId,
       Matrix<N3, N1> stateStdDevs,
       Matrix<N3, N1> visionStdDevs,
       Matrix<N3, N1> singleTagStdDevs,
       Matrix<N3, N1> multiTagStdDevs) {
-    this.ATCam1 = ATCam1;
     this.chassis = chassis;
-    this.robotToCam = cam1Offset;
-
+    this.photonEstimators = photonEstimators;
     this.singleTagStdDevs = singleTagStdDevs;
     this.multiTagStdDevs = multiTagStdDevs;
 
@@ -80,9 +72,6 @@ public class PoseEstimator {
     } catch (IOException e) {
       System.err.println("Failed to load AprilTagFieldLayout");
     }
-    photonEstimator =
-        new PhotonPoseEstimator(
-            aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, ATCam1, robotToCam);
   }
 
   public void update() {

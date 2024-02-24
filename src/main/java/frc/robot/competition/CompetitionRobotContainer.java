@@ -44,13 +44,11 @@ import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.PhotonCamera;
 
 class CompetitionRobotContainer {
   public final Chassis m_chassis;
   private final BaseDrive m_baseDrive;
   public final PoseEstimator m_poseEstimator;
-  private final PhotonCamera m_ATCamera;
   private final Intake m_intake;
   private final Elevator m_Elevator;
   private final Shooter m_Shooter;
@@ -82,15 +80,12 @@ class CompetitionRobotContainer {
 
     SwerveDriveKinematics swerveDriveKinematics = getSwerveDriveKinematics();
 
-    m_ATCamera = new PhotonCamera(RobotConstants.AT_CAMERA_NAME);
-
     m_chassis = new Chassis(modules, swerveDriveKinematics);
 
     m_poseEstimator =
         new PoseEstimator(
             m_chassis,
-            m_ATCamera,
-            RobotConstants.CAM1_OFFSET,
+            RobotConstants.PHOTON_POSE_ESTIMATORS,
             RobotConstants.PIGEON_ID,
             RobotConstants.STATE_STD_DEVS,
             RobotConstants.VISION_STD_DEVS,
