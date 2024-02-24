@@ -103,9 +103,9 @@ public class PoseEstimator {
     Logger.recordOutput("Estimated Velocity", getEstimatedVel());
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedVisionPose() {
+  public Optional<EstimatedRobotPose> getEstimatedVisionPose(PhotonPoseEstimator photonEstimator) {
     var visionEst = photonEstimator.update();
-    double latestTimestamp = ATCam1.getLatestResult().getTimestampSeconds();
+    double latestTimestamp = visionEst.;
     boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
 
     if (newResult) lastEstTimestamp = latestTimestamp;
@@ -120,8 +120,8 @@ public class PoseEstimator {
     return vel.div(0.02); // How consistent is this update rate?
   }
 
-  public PhotonPipelineResult getLatestResult() {
-    return ATCam1.getLatestResult();
+  public PhotonPipelineResult getLatestResult(PhotonPoseEstimator photonEstimator) {
+    return ;
   }
 
   public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
