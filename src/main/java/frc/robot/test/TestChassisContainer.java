@@ -5,6 +5,8 @@
 package frc.robot.test;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -32,7 +34,6 @@ class TestChassisContainer {
   public final PoseEstimator m_poseEstimator;
   private PhotonCamera m_ATCamera;
   private final CommandXboxController m_driveController;
-  private final CommandXboxController m_manipController;
   private final SendableChooser<Command> autoChooser;
 
   TestChassisContainer() {
@@ -54,8 +55,6 @@ class TestChassisContainer {
 
     m_chassis = new Chassis(modules, swerveDriveKinematics);
 
-    m_manipController = new CommandXboxController(0);
-
     m_poseEstimator =
         new PoseEstimator(
             m_chassis,
@@ -68,6 +67,11 @@ class TestChassisContainer {
             RobotConstants.MULTI_TAG_STD_DEVS);
 
     m_driveController = new CommandXboxController(0);
+
+
+    NamedCommands.registerCommand(
+        "AutoDetector", m_chassis.turnToNoteCommand());
+
 
     m_baseDrive =
         new BaseDrive(
@@ -177,8 +181,6 @@ class TestChassisContainer {
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF));
-
-    m_manipController.leftTrigger().whileTrue(m_chassis.turnToNoteCommand());
   }
 
   public Command getAutonomousCommand() {

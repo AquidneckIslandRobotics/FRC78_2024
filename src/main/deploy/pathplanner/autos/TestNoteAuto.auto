@@ -1,0 +1,38 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 2.0400914981573175,
+      "y": 5.972526638348569
+    },
+    "rotation": 0.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "NotePath"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AutoDetector"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
