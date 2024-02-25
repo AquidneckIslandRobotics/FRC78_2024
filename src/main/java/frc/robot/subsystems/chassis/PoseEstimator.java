@@ -82,17 +82,17 @@ public class PoseEstimator {
       Optional<EstimatedRobotPose> estimatedPose =
           getEstimatedVisionPose(photonEstimators[i], photonCams[i]);
 
-      estimatedPose.ifPresent(
-          (EstimatedRobotPose est) -> {
-            var estPose = est.estimatedPose.toPose2d();
-            // Change our trust in the measurement based on the tags we can see
-            var estStdDevs = getEstimationStdDevs(estPose, photonEstimators[i], photonCams[i]);
+      if (estimatedPose.isPresent()) {
+        var est = estimatedPose.get();
+        var estPose = est.estimatedPose.toPose2d();
+        // Change our trust in the measurement based on the tags we can see
+        var estStdDevs = getEstimationStdDevs(estPose, photonEstimators[i], photonCams[i]);
 
-            poseEstimator.addVisionMeasurement(
-                est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+        poseEstimator.addVisionMeasurement(
+            est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
 
-            Logger.recordOutput("AT Estimate", estimatedPose.get().estimatedPose.toPose2d());
-          });
+        Logger.recordOutput("AT Estimate", estimatedPose.get().estimatedPose.toPose2d());
+      }
     }
 
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRot()), chassis.getPositions());

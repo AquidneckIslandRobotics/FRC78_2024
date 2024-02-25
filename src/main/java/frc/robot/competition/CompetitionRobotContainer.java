@@ -86,6 +86,7 @@ class CompetitionRobotContainer {
         new PoseEstimator(
             m_chassis,
             RobotConstants.PHOTON_POSE_ESTIMATORS,
+            RobotConstants.CAMS,
             RobotConstants.PIGEON_ID,
             RobotConstants.STATE_STD_DEVS,
             RobotConstants.VISION_STD_DEVS,

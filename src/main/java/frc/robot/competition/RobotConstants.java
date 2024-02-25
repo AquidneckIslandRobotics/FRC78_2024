@@ -48,11 +48,11 @@ class RobotConstants {
     }
   }
 
-  public static final PhotonCamera CAMS[] = {
+  public static PhotonCamera CAMS[] = {
     new PhotonCamera("Arducam_OV9281_USB_Camera"), new PhotonCamera("Arducam_OV9281_USB_Camera (1)")
   };
 
-  public static final PhotonPoseEstimator PHOTON_POSE_ESTIMATORS[] = {
+  public static PhotonPoseEstimator PHOTON_POSE_ESTIMATORS[] = {
     new PhotonPoseEstimator(
         APRIL_TAG_FIELD_LAYOUT,
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
