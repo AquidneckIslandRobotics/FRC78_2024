@@ -145,13 +145,16 @@ class CompetitionRobotContainer {
         "ScoreFromW2",
         m_Shooter
             .setShooter(RobotConstants.AUTO_SHOOT_SPEED)
-            .alongWith(m_Wrist.setToTarget(RobotConstants.WRIST_W2_TARGET))
+            .alongWith(m_Wrist.setGoal(RobotConstants.WRIST_W2_TARGET))
             .andThen(Commands.waitUntil(m_Wrist::isAtTarget).withTimeout(1)));
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setShooter(RobotConstants.AUTO_SHOOT_SPEED));
     NamedCommands.registerCommand(
         "Score",
-        m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
+        m_feeder
+            .setFeed(RobotConstants.FEED_FIRE_SPEED)
+            .until(() -> !m_feeder.isNoteQueued())
+            .andThen(m_Wrist.stow()));
     NamedCommands.registerCommand("StopShooter", m_Shooter.setShooter(0));
     // Need  to add and then to stop the feed and shooter
 
@@ -269,20 +272,26 @@ class CompetitionRobotContainer {
     // Sets elevator and wrist to Amp score position
     m_manipController
         .y()
-        .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
-        .onFalse(m_Wrist.stow());
+        .onTrue(m_Wrist.setGoal(19).alongWith(m_Elevator.setGoal(13.9)))
+        .onFalse(m_Wrist.stow().alongWith(m_Elevator.stow()));
 
-    m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
+    m_manipController
+        .a()
+        .onTrue(m_Elevator.setGoal(RobotConstants.ELEVATOR_CLIMB_HEIGHT))
+        .onFalse(m_Elevator.stow());
 
-    m_manipController.b().whileTrue(m_Elevator.setToTarget(2));
+    m_manipController.b().onTrue(m_Elevator.setGoal(2)).onFalse(m_Elevator.stow());
 
-    m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());
+    m_manipController.x().onTrue(m_Wrist.setGoal(38)).onFalse(m_Wrist.stow());
 
     m_manipController.rightBumper().whileTrue(pickUpNote);
 
     m_manipController.leftBumper().whileTrue(m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
 
     m_manipController.rightTrigger(0.5).whileTrue(m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED));
+
+    m_manipController.povDown().onTrue(m_Wrist.decrementAngle());
+    m_manipController.povUp().onTrue(m_Wrist.incrementAngle());
 
     // The routine automatically stops the motors at the end of the command
     sysIdController

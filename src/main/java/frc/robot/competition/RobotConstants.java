@@ -159,7 +159,7 @@ class RobotConstants {
   // Wrist Constants
   public static final int WRIST_ID = 13;
 
-  public static final float WRIST_HIGH_LIM = 50;
+  public static final float WRIST_HIGH_LIM = 55;
   public static final float WRIST_LOW_LIM = 0;
 
   // CANDLE //

@@ -53,7 +53,7 @@ public class Elevator extends SubsystemBase {
     return !zeroed;
   }
 
-  private RelativeEncoder encoder;
+  private final RelativeEncoder encoder;
 
   private final double kS = 0.070936;
   private final double kV = 0.79005;
@@ -73,6 +73,8 @@ public class Elevator extends SubsystemBase {
               InchesPerSecond.of(13), InchesPerSecond.per(Second).of(40)),
           kDt);
 
+  private final double STOW_POSITION = 0;
+
   public Elevator() {
     elevNeoMotor1 = new CANSparkMax(11, MotorType.kBrushless);
     elevNeoMotor2 = new CANSparkMax(12, MotorType.kBrushless);
@@ -88,7 +90,6 @@ public class Elevator extends SubsystemBase {
     encoder.setPositionConversionFactor(inchesPerRevolution);
     // Inches per second
     encoder.setVelocityConversionFactor(inchesPerRevolution / 60);
-    elevNeoMotor1.getPIDController().setP(.144);
     elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, false);
     elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, false);
 
@@ -98,7 +99,7 @@ public class Elevator extends SubsystemBase {
     Util.setRevStatusRates(elevNeoMotor1, 5, 20, 20, 65535, 65535, 65535, 65535, 65535);
     Util.setRevStatusRates(elevNeoMotor2, 500, 65535, 65535, 65535, 65535, 65535, 65535, 65535);
 
-    this.setDefaultCommand(setToTarget(0));
+    this.setDefaultCommand(run(this::moveElevator));
   }
 
   public boolean elevatorIsStowed() {
@@ -106,7 +107,9 @@ public class Elevator extends SubsystemBase {
   }
 
   private Command lowerElevatorUntilLimitReached() {
-    return run(() -> elevNeoMotor1.set(-.1)).until(() -> !reverseLimitSwitch.get());
+    return run(() -> elevNeoMotor1.set(-.1))
+        .until(() -> !reverseLimitSwitch.get())
+        .andThen(runOnce(() -> elevNeoMotor1.set(0)));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -127,7 +130,6 @@ public class Elevator extends SubsystemBase {
           elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 15);
           elevNeoMotor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
           zeroed = true;
-          this.setDefaultCommand(setToTarget(.25));
         });
   }
 
@@ -151,22 +153,33 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/Goal", profiledPid.getSetpoint().position);
   }
 
-  /** Moves elevator to target as long as elevator is zeroed */
-  public Command setToTarget(double target) {
-    return runOnce(
-            () -> {
-              profiledPid.setGoal(Units.inchesToMeters(target));
-            })
-        .andThen(
-            run(
-                () -> {
-                  if (!zeroed) return;
-                  appliedOutput =
-                      profiledPid.calculate(Units.inchesToMeters(encoder.getPosition()))
-                          + feedforward.calculate(
-                              MetersPerSecond.of(profiledPid.getSetpoint().velocity)
-                                  .in(InchesPerSecond));
-                  elevNeoMotor1.setVoltage(appliedOutput);
-                }));
+  /**
+   * Set the elevator goal height
+   *
+   * @param goal Goal height for the elevator in inches.
+   */
+  public Command setGoal(double goal) {
+    return runOnce(() -> profiledPid.setGoal(Units.inchesToMeters(goal)));
+  }
+
+  public void holdPosition() {
+    profiledPid.setGoal(encoder.getPosition());
+  }
+
+  public Command stow() {
+    return setGoal(STOW_POSITION);
+  }
+
+  /**
+   * This method actually moves the wrist. The default command will move the wrist to the current
+   * goal
+   */
+  private void moveElevator() {
+    if (!zeroed) return;
+    double ff =
+        feedforward.calculate(
+            MetersPerSecond.of(profiledPid.getSetpoint().velocity).in(InchesPerSecond));
+    double feedback = profiledPid.calculate(Units.inchesToMeters(encoder.getPosition()));
+    elevNeoMotor1.setVoltage(feedback + ff);
   }
 }
