@@ -69,7 +69,7 @@ public class VarShootPrime extends Command {
             - Units.inchesToMeters(elevator.getElevatorPos());
     // Calculate velocity based on lerping within the velocity range based on the distance range
     // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
-    double v = velRange.max;
+    double v = calcVel();
     double theta = calcTheta(Constants.GRAVITY, l, h, v);
     theta = Units.radiansToDegrees(theta);
     double modify = Util.lerp(l, distRange) * heightLengthCoeff;
@@ -84,6 +84,10 @@ public class VarShootPrime extends Command {
         "REAL VALUES PROBABLY", Units.radiansToDegrees(calcTheta(9.81, 2, 1.4, 18)));
 
     shooter.setSpeed(v / RPM_MPS);
+  }
+
+  public double calcVel() {
+    return velRange.max;
   }
 
   // Source? It was revealed to me by a wise tree in a dream
