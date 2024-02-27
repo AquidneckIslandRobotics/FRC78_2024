@@ -72,6 +72,10 @@ public class Structs {
       this.min = min;
       this.max = max;
     }
+
+    public double getRange() {
+      return max - min;
+    }
   }
 
   public static class Range2D<T> {

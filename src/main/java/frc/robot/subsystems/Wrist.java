@@ -48,13 +48,18 @@ public class Wrist extends SubsystemBase {
     Util.setRevStatusRates(wristNeo, 10, 20, 65535, 65535, 65535, 20, 65535, 65535);
   }
 
-  public Command setToTarget(double target) {
+  public Command setToTargetCmd(double target) {
     this.target = target;
     return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
   }
 
+  public void setToTarget(double target) {
+    this.target = target;
+    wristNeo.getPIDController().setReference(target, ControlType.kPosition);
+  }
+
   public Command stow() {
-    return setToTarget(stowPos);
+    return setToTargetCmd(stowPos);
   }
 
   public boolean isAtTarget() {

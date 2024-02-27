@@ -145,6 +145,10 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/Goal", profiledPid.getSetpoint().position);
   }
 
+  public double getElevatorPos() {
+    return encoder.getPosition();
+  }
+
   /** Moves elevator to target as long as elevator is zeroed */
   public Command setToTarget(double target) {
     return runOnce(

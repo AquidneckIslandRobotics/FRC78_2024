@@ -4,8 +4,6 @@
 
 package frc.robot.competition;
 
-import static frc.robot.subsystems.Shooter.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -31,6 +30,7 @@ import frc.robot.classes.BaseDrive;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
 import frc.robot.commands.OrbitalTarget;
+import frc.robot.commands.VarShootPrime;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Feedback;
@@ -83,7 +83,7 @@ class CompetitionRobotContainer {
 
     m_ATCamera = new PhotonCamera(RobotConstants.AT_CAMERA_NAME);
 
-    m_chassis = new Chassis(modules, swerveDriveKinematics);
+    m_chassis = new Chassis(modules, swerveDriveKinematics, RobotConstants.MOTION_LIMITS);
 
     m_poseEstimator =
         new PoseEstimator(
@@ -144,15 +144,15 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand(
         "ScoreFromW2",
         m_Shooter
-            .setShooter(RobotConstants.AUTO_SHOOT_SPEED)
-            .alongWith(m_Wrist.setToTarget(RobotConstants.WRIST_W2_TARGET))
+            .setSpeed(RobotConstants.AUTO_SHOOT_SPEED)
+            .alongWith(m_Wrist.setToTargetCmd(RobotConstants.WRIST_W2_TARGET))
             .andThen(Commands.waitUntil(m_Wrist::isAtTarget).withTimeout(1)));
     NamedCommands.registerCommand(
-        "StartShooter", m_Shooter.setShooter(RobotConstants.AUTO_SHOOT_SPEED));
+        "StartShooter", m_Shooter.setSpeed(RobotConstants.AUTO_SHOOT_SPEED));
     NamedCommands.registerCommand(
         "Score",
         m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
-    NamedCommands.registerCommand("StopShooter", m_Shooter.setShooter(0));
+    NamedCommands.registerCommand("StopShooter", m_Shooter.setSpeed(0));
     // Need  to add and then to stop the feed and shooter
 
     AutoBuilder.configureHolonomic(
@@ -206,9 +206,11 @@ class CompetitionRobotContainer {
         .onFalse(shortRumble(m_driveController.getHID()))
         .onFalse(m_feedback.multi(Color.kRed));
     new Trigger(() -> m_Shooter.isAtSpeed(.9)).onTrue(shortRumble(m_manipController.getHID()));
+
     m_driveController
         .start()
         .onTrue(new InstantCommand(() -> m_poseEstimator.resetPose(new Pose2d())));
+
     m_driveController
         .rightBumper()
         .whileTrue(
@@ -289,20 +291,37 @@ class CompetitionRobotContainer {
 
     m_manipController
         .leftTrigger(0.5)
-        .whileTrue(m_Shooter.setShooter(4250))
-        .whileFalse(m_Shooter.setShooter(0));
+        .onTrue(m_Shooter.setSpeed(4250))
+        .onFalse(m_Shooter.setSpeed(0));
 
     // Sets elevator and wrist to Amp score position
     m_manipController
         .y()
-        .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
+        .whileTrue(m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)))
         .onFalse(m_Wrist.stow());
+
+    m_manipController
+        .x()
+        .whileTrue(
+            new SequentialCommandGroup(
+                new VarShootPrime(
+                    m_Wrist,
+                    m_Shooter,
+                    m_Elevator,
+                    m_poseEstimator,
+                    RobotConstants.SHOOT_POINT,
+                    RobotConstants.VELOCITY_RANGE,
+                    RobotConstants.DISTANCE_RANGE,
+                    RobotConstants.HEIGHT_LENGTH_COEFF,
+                    RobotConstants.SHOOTER_RPM_TO_MPS),
+                m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM),
+                m_Shooter.setSpeed(0)));
 
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 
     m_manipController.b().whileTrue(m_Elevator.setToTarget(2));
 
-    m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());
+    // m_manipController.x().whileTrue(m_Wrist.setToTargetCmd(38)).onFalse(m_Wrist.stow());
 
     m_manipController.rightBumper().whileTrue(pickUpNote);
 

@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.classes.Structs.Range;
 import frc.robot.constants.Constants;
 
 /** Utility class */
@@ -54,6 +55,18 @@ public class Util {
   /*Returns right-hand perpendicular vector */
   public static Translation2d perpendicular(Translation2d vector) {
     return new Translation2d(vector.getY(), -vector.getX());
+  }
+
+  public static double clamp(double x, Range range) {
+    return Math.max(range.min, Math.min(range.max, x));
+  }
+
+  public static double clamp(double x, double min, double max) {
+    return Math.max(min, Math.min(max, x));
+  }
+
+  public static double lerp(double x, Range range) {
+    return range.min + (range.max - range.min) * x;
   }
 
   public static void setRevStatusRates(

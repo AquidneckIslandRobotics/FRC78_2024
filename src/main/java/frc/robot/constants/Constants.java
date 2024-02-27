@@ -21,6 +21,18 @@ public final class Constants {
 
   public static final Translation2d BLUE_ORBIT_POSE = new Translation2d(0, 5.5);
   public static final Translation2d RED_ORBIT_POSE = new Translation2d(16.5, 5.5);
+  // TODO should revise and precisely measure these values, they are estimates
+  public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(0, 5.5);
+  public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.5, 5.5);
+  public static final double SPEAKER_HEIGHT = 2.1;
+  public static final Supplier<Translation2d> SPEAKER_TRANSLATION =
+      () ->
+          DriverStation.getAlliance().isPresent()
+              ? (DriverStation.getAlliance().get() == Alliance.Red
+                  ? RED_SPEAKER_POSE
+                  : BLUE_SPEAKER_POSE)
+              : BLUE_SPEAKER_POSE;
+
   public static final Transform2d BLUE_AMP =
       new Transform2d(1.83, 7.47, Rotation2d.fromDegrees(90));
   public static final Transform2d RED_AMP =
@@ -33,4 +45,6 @@ public final class Constants {
 
   public static final double ORBIT_RADIUS = 2;
   public static final double ORBIT_RADIUS_MARGIN = 1.0;
+
+  public static final double GRAVITY = 9.807;
 }

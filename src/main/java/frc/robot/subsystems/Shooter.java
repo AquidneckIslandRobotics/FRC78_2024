@@ -9,6 +9,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.pathplanner.lib.util.PIDConstants;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.classes.Structs.FFConstants;
@@ -24,6 +26,10 @@ public class Shooter extends SubsystemBase {
   private final VelocityVoltage shooterBottomVV;
 
   private final ShooterConfig config;
+
+  private final NetworkTableEntry slowShot;
+
+  private final double slowShotSpeed = 500;
 
   /** Creates a new Shooter. */
   public Shooter(ShooterConfig config) {
@@ -62,6 +68,10 @@ public class Shooter extends SubsystemBase {
 
     shooterTOP.optimizeBusUtilization();
     shooterBOTTOM.optimizeBusUtilization();
+
+    slowShot = SmartDashboard.getEntry("shooter/slowShot");
+    slowShot.setPersistent();
+    slowShot.setDefaultBoolean(false);
   }
 
   public boolean isAtSpeed(double threshold) {
@@ -69,23 +79,30 @@ public class Shooter extends SubsystemBase {
         && (shooterTopVV.Velocity != 0));
   }
 
-  public void setPIDReferenceTOP(double setPoint) {
+  private void setPIDReferenceTOP(double setPoint) {
     shooterTOP.setControl(
         shooterTopVV.withVelocity(setPoint / 60).withFeedForward(config.flywheelTopFF.kFF));
   }
 
-  public void setPIDReferenceBOTTOM(double setPoint) {
+  private void setPIDReferenceBOTTOM(double setPoint) {
     shooterBOTTOM.setControl(
         shooterBottomVV.withVelocity(setPoint / 60).withFeedForward(config.flywheelTopFF.kFF));
   }
 
-  public void setPIDReferenceBOTH(double setPoint) {
+  private void setPIDReferenceBOTH(double setPoint) {
     setPIDReferenceTOP(setPoint);
     setPIDReferenceBOTTOM(setPoint);
   }
 
-  public Command setShooter(double setPoint) {
-    return this.runOnce(() -> this.setPIDReferenceBOTH(setPoint));
+  public Command setSpeed(double setPoint) {
+    return this.runOnce(
+        () -> {
+          if (slowShot.getBoolean(false)) {
+            this.setPIDReferenceBOTH(Math.min(setPoint, slowShotSpeed));
+          } else {
+            this.setPIDReferenceBOTH(setPoint);
+          }
+        });
   }
 
   @Override
