@@ -26,7 +26,12 @@ public class CalcAimAngle {
         distGoal / (v.getAsDouble() * Math.cos(Units.degreesToRadians(theta.getAsDouble())));
     double lateralDisplacement =
         -robotVel.get().getTranslation().getY() * tAtGoal; // Negate because +Y is left hand
+    Translation2d endOffset =
+        Util.vectorFromAngle(robotPose.get().getRotation().getRadians() - (Math.PI / 2))
+            .times(lateralDisplacement);
 
-    return 0;
+    Translation2d goal = speakerTranslation.get().plus(endOffset);
+
+    return goal.minus(robotPose.get().getTranslation()).getAngle().getRadians();
   }
 }

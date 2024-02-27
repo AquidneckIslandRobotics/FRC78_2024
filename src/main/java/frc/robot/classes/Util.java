@@ -57,6 +57,10 @@ public class Util {
     return new Translation2d(vector.getY(), -vector.getX());
   }
 
+  public static Translation2d vectorFromAngle(double x) {
+    return new Translation2d(Math.cos(x), Math.sin(x));
+  }
+
   public static double clamp(double x, Range range) {
     return Math.max(range.min, Math.min(range.max, x));
   }
