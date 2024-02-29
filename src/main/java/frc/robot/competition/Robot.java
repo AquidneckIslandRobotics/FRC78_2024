@@ -9,6 +9,7 @@ import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
@@ -80,6 +82,9 @@ public class Robot extends LoggedRobot {
             });
     visionThread.setDaemon(true);
     visionThread.start();
+
+    DataLogManager.start();
+    URCL.start(RobotConstants.SparkMaxAliases);
   }
 
   @Override

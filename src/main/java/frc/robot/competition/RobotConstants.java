@@ -21,6 +21,8 @@ import frc.robot.classes.ModuleConfig;
 import frc.robot.classes.Structs.*;
 import frc.robot.subsystems.Shooter.ShooterConfig;
 
+import java.util.HashMap;
+
 /** This is the constants for the NEO */
 class RobotConstants {
   public static final double WHEEL_WIDTH = 0.426; // Make sure this is from the wheel's center
@@ -171,4 +173,24 @@ class RobotConstants {
   public static final double AUTO_SHOOT_SPEED = 500;
   public static final double AUTO_WRIST_SETPOINT = 0;
   public static final double WRIST_W2_TARGET = 35;
+
+  /** CAN ID to name alias for URCL */
+  public static final HashMap<Integer, String> SparkMaxAliases =
+      new HashMap<>() {
+        {
+          put(1, "front_left_drive");
+          put(2, "front_left_steer");
+          put(3, "front_right_drive");
+          put(4, "front_right_steer");
+          put(5, "back_left_drive");
+          put(6, "back_left_steer");
+          put(7, "back_right_drive");
+          put(8, "back_right_steer");
+          put(9, "intake_bottom");
+          put(10, "intake_top");
+          put(11, "elevator_leader");
+          put(12, "elevator_follower");
+          put(13, "wrist");
+        }
+      };
 }
