@@ -179,8 +179,9 @@ class RobotConstants {
   public static final Translation2d SHOOT_POINT = new Translation2d(0, 0.6); // TODO
   public static final double SHOOTER_RPM_TO_MPS =
       (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
-  public static final Range VELOCITY_RANGE =
-      new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
+  //   public static final Range VELOCITY_RANGE =
+  //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
+  public static final double SHOOTER_VEL = 5000; // RPM
   public static final Range DISTANCE_RANGE = new Range(1.25, 3);
   public static final double HEIGHT_LENGTH_COEFF = 0.5;
 }

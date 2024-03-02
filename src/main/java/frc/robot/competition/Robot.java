@@ -100,7 +100,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledExit() {
     m_robotContainer.m_chassis.setBrake(
-        RobotConstants.MODULE_CONFIG.driveIdleMode == IdleMode.kBrake ? true : false);
+        RobotConstants.MODULE_CONFIG.driveIdleMode == IdleMode.kBrake);
   }
 
   @Override

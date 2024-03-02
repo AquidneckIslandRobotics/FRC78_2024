@@ -65,7 +65,6 @@ public class Wrist extends SubsystemBase {
   }
 
   public Command incrementUp() {
-
     return runOnce(
         () -> {
           target++;

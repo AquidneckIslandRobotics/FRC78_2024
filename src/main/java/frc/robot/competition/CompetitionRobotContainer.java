@@ -61,6 +61,7 @@ class CompetitionRobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final Command pickUpNote;
   private final Command AmpSetUp;
+  private final Command varShootPrimeCmd;
 
   CompetitionRobotContainer() {
 
@@ -135,13 +136,23 @@ class CompetitionRobotContainer {
     pickUpNote =
         m_intake
             .intakeCommand()
-            .alongWith(
-                m_Wrist.setToTarget(
-                    55)) // new intake angle (stow is 55 as well, but calling it here due to auto
+            .alongWith(m_Wrist.setToTarget(55)) // new intake angle (stow is 55 as well, but
+            // calling it here due to auto
             // using other positions)
             .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
             .until(m_feeder::isNoteQueued);
     AmpSetUp = (m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)));
+
+    varShootPrimeCmd =
+        new VarShootPrime(
+            m_Wrist,
+            m_Elevator,
+            m_poseEstimator,
+            RobotConstants.SHOOT_POINT,
+            RobotConstants.SHOOTER_VEL,
+            RobotConstants.DISTANCE_RANGE,
+            RobotConstants.HEIGHT_LENGTH_COEFF,
+            RobotConstants.SHOOTER_RPM_TO_MPS);
 
     NamedCommands.registerCommand("Intake", pickUpNote);
     NamedCommands.registerCommand(
@@ -160,7 +171,7 @@ class CompetitionRobotContainer {
         "scoreInAmp", m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
     NamedCommands.registerCommand("stow", m_Wrist.stow());
 
-    // Need  to add and then to stop the feed and shooter
+    // Need to add and then to stop the feed and shooter
 
     AutoBuilder.configureHolonomic(
         m_poseEstimator::getFusedPose, // Robot pose supplier
@@ -283,7 +294,10 @@ class CompetitionRobotContainer {
                       (m_driveController.b().getAsBoolean() ? 1 : 0)
                           - (m_driveController.x().getAsBoolean() ? 1 : 0);
                   double dir = -Math.atan2(yCardinal, xCardinal);
-                  dir = dir < 0 ? dir + 2 * Math.PI : dir; // TODO check if needed
+                  dir = dir < 0 ? dir + 2 * Math.PI : dir; // TODO
+                  // check
+                  // if
+                  // needed
 
                   Logger.recordOutput("goalCardinal", dir);
                   return dir;
@@ -314,6 +328,19 @@ class CompetitionRobotContainer {
     // .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
     // .onFalse(m_Wrist.stow());
 
+    new Trigger(m_feeder::isNoteQueued)
+        .onTrue(Commands.runOnce(() -> m_Wrist.setDefaultCommand(varShootPrimeCmd)))
+        .onFalse(
+            Commands.runOnce(
+                () ->
+                    m_Wrist.setDefaultCommand(m_Wrist.setToTarget(RobotConstants.WRIST_HIGH_LIM))));
+
+    // Where did the old spinup bind go?
+    m_manipController
+        .leftTrigger(0.5)
+        .whileTrue(m_Shooter.setSpeed(RobotConstants.SHOOTER_VEL))
+        .onFalse(m_Shooter.setSpeed(0));
+
     m_testController.x().whileTrue(m_feedback.rainbows());
     m_testController.b().whileTrue(m_feedback.setColor(Color.kBlue));
 
@@ -325,7 +352,7 @@ class CompetitionRobotContainer {
                 .alongWith(m_Elevator.setToTarget(13.9))); // Sets to AMP // sets to STOW
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 
-    m_manipController.b().whileTrue(m_intake.outtakeCommand().alongWith(m_feeder.setFeed(-0.3)));
+    m_manipController.b().whileTrue(m_Elevator.setToTarget(2));
 
     // m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());
 
