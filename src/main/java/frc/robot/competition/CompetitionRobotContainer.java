@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -30,7 +29,6 @@ import frc.robot.classes.BaseDrive;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
 import frc.robot.commands.OrbitalTarget;
-import frc.robot.commands.VarShootPrime;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Feedback;
@@ -55,7 +53,7 @@ class CompetitionRobotContainer {
   private final Shooter m_Shooter;
   private final Wrist m_Wrist;
   private final Feeder m_feeder;
-  private final Feedback m_feedback;
+  final Feedback m_feedback;
   private final CommandXboxController m_driveController;
   private final CommandXboxController m_manipController;
   private final CommandXboxController m_testController;
@@ -211,11 +209,14 @@ class CompetitionRobotContainer {
   private void configureBindings() {
     new Trigger(m_feeder::isNoteQueued)
         .onTrue(shortRumble(m_driveController.getHID()))
-        .onTrue(m_feedback.multi(Color.kDarkMagenta))
-        .onFalse(shortRumble(m_driveController.getHID()))
-        .onFalse(m_feedback.multi(Color.kRed));
-    new Trigger(() -> m_Shooter.isAtSpeed(.9)).onTrue(shortRumble(m_manipController.getHID()));
-
+        .onTrue(m_feedback.noteInCartridge())
+        .onFalse(shortRumble(m_driveController.getHID()));
+    new Trigger(() -> m_Shooter.isAtSpeed(.9))
+        .onTrue(shortRumble(m_manipController.getHID()))
+        .onTrue(m_feedback.shooterWheelsAtSpeed());
+    new Trigger(() -> m_intake.hasNote())
+        .onTrue(m_feedback.intakeCurrentSpike())
+        .onFalse(m_feedback.turnOffLEDs());
     m_driveController
         .start()
         .onTrue(new InstantCommand(() -> m_poseEstimator.resetPose(new Pose2d())));
@@ -298,6 +299,13 @@ class CompetitionRobotContainer {
         .and(m_Elevator::hasNotBeenZeroed)
         .onTrue(m_Elevator.zeroElevator());
 
+    RobotModeTriggers.disabled()
+        .onTrue(Commands.runOnce(() -> m_feedback.disabledColorPattern()).ignoringDisable(true));
+
+    m_manipController
+        .leftTrigger(0.5)
+        .whileTrue(m_Shooter.setSpeed(500))
+        .whileFalse(m_Shooter.setSpeed(0));
     // TODO switch the variable code onto left trigger
 
     // Sets elevator and wrist to Amp score position
@@ -306,23 +314,15 @@ class CompetitionRobotContainer {
     // .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
     // .onFalse(m_Wrist.stow());
 
-    m_manipController
-        .x()
-        .whileTrue(
-            new SequentialCommandGroup(
-                new VarShootPrime(
-                    m_Wrist,
-                    m_Shooter,
-                    m_Elevator,
-                    m_poseEstimator,
-                    RobotConstants.SHOOT_POINT,
-                    RobotConstants.VELOCITY_RANGE,
-                    RobotConstants.DISTANCE_RANGE,
-                    RobotConstants.HEIGHT_LENGTH_COEFF,
-                    RobotConstants.SHOOTER_RPM_TO_MPS),
-                m_Wrist.setToTarget(RobotConstants.WRIST_HIGH_LIM),
-                m_Shooter.setSpeed(0)));
+    m_testController.x().whileTrue(m_feedback.rainbows());
+    m_testController.b().whileTrue(m_feedback.setColor(Color.kBlue));
 
+    m_manipController
+        .y()
+        .whileTrue(
+            m_Wrist
+                .setToTarget(110)
+                .alongWith(m_Elevator.setToTarget(13.9))); // Sets to AMP // sets to STOW
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 
     m_manipController.b().whileTrue(m_intake.outtakeCommand().alongWith(m_feeder.setFeed(-0.3)));
