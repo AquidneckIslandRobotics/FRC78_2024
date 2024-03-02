@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.4057210590611662,
-        "y": 6.113971237466285
+        "x": 1.4448129467687512,
+        "y": 5.566684809560096
       },
       "prevControl": {
-        "x": 2.078101527631626,
-        "y": 6.512708492083652
+        "x": 2.1171934153392113,
+        "y": 5.965422064177463
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CentStart"
     }
   ],
   "rotationTargets": [
@@ -45,7 +45,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 21.370622269343283,
+    "rotation": 1.9749340108819915,
     "rotateFast": false
   },
   "reversed": false,

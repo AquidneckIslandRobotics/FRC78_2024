@@ -62,6 +62,7 @@ class CompetitionRobotContainer {
   private final CommandXboxController sysIdController;
   private final SendableChooser<Command> autoChooser;
   private final Command pickUpNote;
+  private final Command AmpSetUp;
 
   CompetitionRobotContainer() {
 
@@ -136,9 +137,13 @@ class CompetitionRobotContainer {
     pickUpNote =
         m_intake
             .intakeCommand()
-            .onlyWhile(m_Elevator::elevatorIsStowed)
+            .alongWith(
+                m_Wrist.setToTarget(
+                    55)) // new intake angle (stow is 55 as well, but calling it here due to auto
+            // using other positions)
             .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
             .until(m_feeder::isNoteQueued);
+    AmpSetUp = (m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)));
 
     NamedCommands.registerCommand("Intake", pickUpNote);
     NamedCommands.registerCommand(
@@ -152,7 +157,11 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand(
         "Score",
         m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
-    NamedCommands.registerCommand("StopShooter", m_Shooter.setSpeed(0));
+    NamedCommands.registerCommand("AmpSetUp", AmpSetUp);
+    NamedCommands.registerCommand(
+        "scoreInAmp", m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
+    NamedCommands.registerCommand("stow", m_Wrist.stow());
+
     // Need  to add and then to stop the feed and shooter
 
     AutoBuilder.configureHolonomic(
@@ -289,16 +298,13 @@ class CompetitionRobotContainer {
         .and(m_Elevator::hasNotBeenZeroed)
         .onTrue(m_Elevator.zeroElevator());
 
-    m_manipController
-        .leftTrigger(0.5)
-        .onTrue(m_Shooter.setSpeed(4250))
-        .onFalse(m_Shooter.setSpeed(0));
+    // TODO switch the variable code onto left trigger
 
     // Sets elevator and wrist to Amp score position
-    m_manipController
-        .y()
-        .whileTrue(m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)))
-        .onFalse(m_Wrist.stow());
+    // m_manipController
+    // .y()
+    // .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
+    // .onFalse(m_Wrist.stow());
 
     m_manipController
         .x()
@@ -319,9 +325,9 @@ class CompetitionRobotContainer {
 
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 
-    m_manipController.b().whileTrue(m_Elevator.setToTarget(2));
+    m_manipController.b().whileTrue(m_intake.outtakeCommand().alongWith(m_feeder.setFeed(-0.3)));
 
-    // m_manipController.x().whileTrue(m_Wrist.setToTargetCmd(38)).onFalse(m_Wrist.stow());
+    // m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());
 
     m_manipController.rightBumper().whileTrue(pickUpNote);
 
@@ -329,11 +335,25 @@ class CompetitionRobotContainer {
 
     m_manipController.rightTrigger(0.5).whileTrue(m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED));
 
+    m_testController.a().onTrue(m_Wrist.incrementUp());
+
+    m_testController.b().onTrue(m_Wrist.incrementDown());
+
     // The routine automatically stops the motors at the end of the command
     sysIdController.a().whileTrue(m_chassis.sysIdQuasistatic(Direction.kForward));
     sysIdController.b().whileTrue(m_chassis.sysIdDynamic(Direction.kForward));
     sysIdController.x().whileTrue(m_chassis.sysIdQuasistatic(Direction.kReverse));
     sysIdController.y().whileTrue(m_chassis.sysIdDynamic(Direction.kReverse));
+
+    RobotModeTriggers.teleop()
+        .onTrue(
+            m_Elevator
+                .enableBrakeMode()
+                .andThen(m_Wrist.enableBrakeMode())
+                .andThen(m_chassis.enableBrakeMode()));
+
+    RobotModeTriggers.disabled()
+        .onTrue(m_Wrist.enableCoastMode().andThen(m_chassis.enableCoastMode()));
   }
 
   public Command getAutonomousCommand() {

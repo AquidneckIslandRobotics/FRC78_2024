@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.classes.Util;
@@ -31,6 +32,8 @@ public class Intake extends SubsystemBase {
 
     this.intakeSpeed = intakeSpeed;
     this.outtakeSpeed = outtakeSpeed;
+
+    SmartDashboard.putData(this);
   }
 
   /* intake speed is same for top and bottom */
@@ -40,10 +43,12 @@ public class Intake extends SubsystemBase {
   }
 
   public Command intakeCommand() {
-    return this.startEnd(() -> this.setIntake(intakeSpeed), () -> this.setIntake(0));
+    return this.startEnd(() -> this.setIntake(intakeSpeed), () -> this.setIntake(0))
+        .withName("intake");
   }
 
   public Command outtakeCommand() {
-    return this.startEnd(() -> this.setIntake(outtakeSpeed), () -> this.setIntake(0));
+    return this.startEnd(() -> this.setIntake(outtakeSpeed), () -> this.setIntake(0))
+        .withName("outtake");
   }
 }

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.2102616205232415,
+      "y": 6.528345247166685
     },
-    "rotation": 42.039063865836305
+    "rotation": 47.082565279730886
   },
   "command": {
     "type": "sequential",
@@ -15,12 +15,6 @@
           "type": "named",
           "data": {
             "name": "StartShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
           }
         },
         {
@@ -49,15 +43,41 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Score"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "W3.C4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 1.0
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "C4.Score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartShooter"
+                }
+              }
+            ]
           }
         },
         {
@@ -88,25 +108,13 @@
                 "data": {
                   "pathName": "MID1.AMPside"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartShooter"
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score"
           }
         }
       ]
     }
   },
-  "folder": "3 Note Sides",
+  "folder": "4 Note Autos",
   "choreoAuto": false
 }

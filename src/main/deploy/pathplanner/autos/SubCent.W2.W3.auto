@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.4448129467687512,
+      "y": 5.566684809560096
     },
-    "rotation": 42.039063865836305
+    "rotation": 0.9548412538721408
   },
   "command": {
     "type": "sequential",
@@ -36,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpSide.AmpNote"
+                  "pathName": "Center.CenterNote"
                 }
               },
               {
@@ -51,13 +51,19 @@
         {
           "type": "named",
           "data": {
-            "name": "Score"
+            "name": "ScoreFromW2"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         },
         {
@@ -67,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpNote.MID1"
+                  "pathName": "CenterNote.AmpNote"
                 }
               },
               {
@@ -86,7 +92,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MID1.AMPside"
+                  "pathName": "AmpfromCentScr"
                 }
               },
               {
@@ -107,6 +113,6 @@
       ]
     }
   },
-  "folder": "3 Note Sides",
+  "folder": "The L Autos",
   "choreoAuto": false
 }

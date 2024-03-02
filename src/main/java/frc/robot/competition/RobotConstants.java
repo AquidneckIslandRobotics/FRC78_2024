@@ -139,11 +139,13 @@ class RobotConstants {
 
   // Time of flight sensor range of interest
   public static final Range2D<Integer> TOF_RANGE = new Range2D<Integer>(10, 10, 11, 11);
-  public static final double FEED_SENSOR_THRESHOLD = 160;
+  public static final double FEED_SENSOR_THRESHOLD = 200;
 
-  public static final double FEED_INTAKE_SPEED = 0.1;
+  public static final double FEED_INTAKE_SPEED = 0.3;
   public static final double FEED_OUTTAKE_SPEED = -1;
   public static final double FEED_FIRE_SPEED = 1;
+
+  public static final double WRIST_SUB_AUTO_POS = 50;
 
   public static final ShooterConfig SHOOTER_CONFIG =
       new ShooterConfig(
@@ -161,14 +163,14 @@ class RobotConstants {
   // Wrist Constants
   public static final int WRIST_ID = 13;
 
-  public static final float WRIST_HIGH_LIM = 50;
+  public static final float WRIST_HIGH_LIM = 55;
   public static final float WRIST_LOW_LIM = 0;
 
   // CANDLE //
   public static final int CANDLE_ID = 1;
 
   // TODO auto stuff, but what for and is it needed?
-  public static final double AUTO_SHOOT_SPEED = 5000;
+  public static final double AUTO_SHOOT_SPEED = 500;
   public static final double AUTO_WRIST_SETPOINT = 0;
   public static final double WRIST_W2_TARGET = 35;
 

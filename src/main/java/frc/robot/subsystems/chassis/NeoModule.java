@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -302,5 +303,17 @@ public class NeoModule implements SwerveModule {
         // the drive encoder has the necessary position and velocity conversion factors already set
         .linearVelocity(mutableVelocity.mut_replace(driveEnc.getVelocity(), MetersPerSecond))
         .linearPosition(mutableDistance.mut_replace(driveEnc.getPosition(), Meters));
+  }
+
+  @Override
+  public void enableBrakeMode() {
+    drive.setIdleMode(CANSparkBase.IdleMode.kBrake);
+    steer.setIdleMode(CANSparkBase.IdleMode.kBrake);
+  }
+
+  @Override
+  public void enableCoastMode() {
+    drive.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    steer.setIdleMode(CANSparkBase.IdleMode.kCoast);
   }
 }

@@ -13,8 +13,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.classes.Structs.MotionLimits;
@@ -40,6 +43,10 @@ public class Chassis extends SubsystemBase {
 
     getStates = new SwerveModuleState[4];
     getPositions = new SwerveModulePosition[4];
+
+    SmartDashboard.putData(this);
+    SmartDashboard.putData(enableBrakeMode());
+    SmartDashboard.putData(enableCoastMode());
   }
 
   public void setBrake(Boolean y) {
@@ -113,6 +120,30 @@ public class Chassis extends SubsystemBase {
       // Each motor will write to the log directly
       module.logMotor(log);
     }
+  }
+
+  public Command enableCoastMode() {
+    return Commands.runOnce(
+            () -> {
+              for (SwerveModule module : modules) {
+                module.enableCoastMode();
+              }
+            })
+        .andThen(new PrintCommand("Coast Mode Set On Chassis"))
+        .ignoringDisable(true)
+        .withName("Enable Chassis Coast");
+  }
+
+  public Command enableBrakeMode() {
+    return Commands.runOnce(
+            () -> {
+              for (SwerveModule module : modules) {
+                module.enableBrakeMode();
+              }
+            })
+        .andThen(new PrintCommand("Brake Mode Set On Chassis"))
+        .ignoringDisable(true)
+        .withName("Enable Chassis Brake");
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

@@ -11,7 +11,10 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
@@ -20,7 +23,7 @@ public class Wrist extends SubsystemBase {
 
   private CANSparkMax wristNeo;
   private AbsoluteEncoder encoder;
-  private double stowPos = 50;
+  private double stowPos = 55;
   private double target = 0;
 
   /** Creates a new Wrist. */
@@ -34,6 +37,9 @@ public class Wrist extends SubsystemBase {
     encoder = wristNeo.getAbsoluteEncoder(Type.kDutyCycle);
     encoder.setPositionConversionFactor(360);
     wristNeo.getPIDController().setFeedbackDevice(encoder);
+    wristNeo.getPIDController().setPositionPIDWrappingEnabled(true);
+    wristNeo.getPIDController().setPositionPIDWrappingMinInput(0);
+    wristNeo.getPIDController().setPositionPIDWrappingMaxInput(360);
     wristNeo.getPIDController().setP(.03);
 
     encoder.setInverted(true);
@@ -46,11 +52,33 @@ public class Wrist extends SubsystemBase {
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     Util.setRevStatusRates(wristNeo, 10, 20, 65535, 65535, 65535, 20, 65535, 65535);
+
+    SmartDashboard.putData(this);
+    SmartDashboard.putData(enableBrakeMode());
+    SmartDashboard.putData(enableCoastMode());
   }
 
   public Command setToTargetCmd(double target) {
     this.target = target;
-    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition));
+    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition))
+        .withName("setGoal[" + target + "]");
+  }
+
+  public Command incrementUp() {
+
+    return runOnce(
+        () -> {
+          target++;
+          wristNeo.getPIDController().setReference(target, ControlType.kPosition);
+        });
+  }
+
+  public Command incrementDown() {
+    return runOnce(
+        () -> {
+          target--;
+          wristNeo.getPIDController().setReference(target, ControlType.kPosition);
+        });
   }
 
   public void setToTarget(double target) {
@@ -59,7 +87,21 @@ public class Wrist extends SubsystemBase {
   }
 
   public Command stow() {
-    return setToTargetCmd(stowPos);
+    return setToTarget(stowPos).withName("Stow");
+  }
+
+  public Command enableCoastMode() {
+    return Commands.runOnce(() -> wristNeo.setIdleMode(IdleMode.kCoast))
+        .andThen(new PrintCommand("Coast Mode Set On Wrist"))
+        .ignoringDisable(true)
+        .withName("Enable Wrist Coast");
+  }
+
+  public Command enableBrakeMode() {
+    return Commands.runOnce(() -> wristNeo.setIdleMode(IdleMode.kBrake))
+        .andThen(new PrintCommand("Brake Mode Set On Wrist"))
+        .ignoringDisable(true)
+        .withName("Enable Wrist Brake");
   }
 
   public boolean isAtTarget() {
