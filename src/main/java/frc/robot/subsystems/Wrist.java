@@ -58,7 +58,7 @@ public class Wrist extends SubsystemBase {
     SmartDashboard.putData(enableCoastMode());
   }
 
-  public Command setToTargetCmd(double target) {
+  public Command setToTarget(double target) {
     this.target = target;
     return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition))
         .withName("setGoal[" + target + "]");
@@ -79,11 +79,6 @@ public class Wrist extends SubsystemBase {
           target--;
           wristNeo.getPIDController().setReference(target, ControlType.kPosition);
         });
-  }
-
-  public void setToTarget(double target) {
-    this.target = target;
-    wristNeo.getPIDController().setReference(target, ControlType.kPosition);
   }
 
   public Command stow() {
