@@ -77,7 +77,7 @@ public class VarShootPrime extends Command {
             - Units.inchesToMeters(elevator.getElevatorPos());
     // Calculate velocity based on lerping within the velocity range based on the distance range
     // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
-    double v = calcVel();
+    double v = calcVel() + poseEstimator.getEstimatedVel().getX();
     double theta = calcTheta(Constants.GRAVITY, l, h, v);
     theta = Units.radiansToDegrees(theta);
     double modify = Util.lerp(l, distRange) * heightLengthCoeff;

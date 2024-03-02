@@ -45,5 +45,5 @@ public final class Constants {
   public static final Measure<Distance> ORBIT_RADIUS = Meters.of(2);
   public static final Measure<Distance> ORBIT_RADIUS_MARGIN = Meters.of(1.0);
 
-  public static final double GRAVITY = 9.807;
+  public static final double GRAVITY = 9.80298;
 }
