@@ -47,12 +47,12 @@ public class Feedback extends SubsystemBase {
   public Command shooterWheelsAtSpeed() {
     return this.startEnd(
         () -> {
-          StrobeAnimation sa = new StrobeAnimation(255, 0, 0, 255, 0.5, 60, 8);
+          StrobeAnimation sa = new StrobeAnimation(255, 0, 0, 255, 0.2, 60, 8);
           bracelet.clearAnimation(1);
           bracelet.clearAnimation(2);
           bracelet.animate(sa, 1);
         },
-        this::off);
+        this::setAllianceColor);
   }
 
   public Command noteInCartridge() {

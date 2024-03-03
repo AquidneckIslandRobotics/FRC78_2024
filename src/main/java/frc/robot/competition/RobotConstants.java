@@ -135,16 +135,6 @@ class RobotConstants {
 
   // FEED //
   public static final int FEED_ID = 16;
-  public static final int FEED_SENSOR_ID = 17;
-
-  // Time of flight sensor range of interest
-  public static final Range2D<Integer> TOF_RANGE = new Range2D<Integer>(10, 10, 11, 11);
-  public static final double FEED_SENSOR_THRESHOLD = 300;
-
-  public static final double FEED_INTAKE_SPEED = 0.15;
-  public static final double FEED_OUTTAKE_SPEED = -1;
-  public static final double FEED_FIRE_SPEED = 1;
-
   public static final double WRIST_SUB_AUTO_POS = 50;
 
   public static final ShooterConfig SHOOTER_CONFIG =

@@ -124,12 +124,7 @@ class CompetitionRobotContainer {
         new Wrist(
             RobotConstants.WRIST_ID, RobotConstants.WRIST_HIGH_LIM, RobotConstants.WRIST_LOW_LIM);
 
-    m_feeder =
-        new Feeder(
-            RobotConstants.FEED_ID,
-            RobotConstants.FEED_SENSOR_ID,
-            RobotConstants.TOF_RANGE,
-            RobotConstants.FEED_SENSOR_THRESHOLD);
+    m_feeder = new Feeder(RobotConstants.FEED_ID);
 
     m_feedback = new Feedback(RobotConstants.CANDLE_ID);
 
@@ -139,8 +134,7 @@ class CompetitionRobotContainer {
             .alongWith(m_Wrist.setToTargetCmd(55)) // new intake angle (stow is 55 as well, but
             // calling it here due to auto
             // using other positions)
-            .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
-            .until(m_feeder::isNoteQueued);
+            .deadlineWith(m_feeder.intake());
     AmpSetUp = (m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)));
 
     NamedCommands.registerCommand("Intake", pickUpNote);
@@ -152,12 +146,9 @@ class CompetitionRobotContainer {
             .andThen(Commands.waitUntil(m_Wrist::isAtTarget).withTimeout(1)));
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setSpeed(RobotConstants.AUTO_SHOOT_SPEED));
-    NamedCommands.registerCommand(
-        "Score",
-        m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED).until(() -> !m_feeder.isNoteQueued()));
+    NamedCommands.registerCommand("Score", m_feeder.shoot());
     NamedCommands.registerCommand("AmpSetUp", AmpSetUp);
-    NamedCommands.registerCommand(
-        "scoreInAmp", m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
+    NamedCommands.registerCommand("scoreInAmp", m_feeder.outtake().withTimeout(2));
     NamedCommands.registerCommand("stow", m_Wrist.stow());
 
     // Need to add and then to stop the feed and shooter
@@ -361,9 +352,9 @@ class CompetitionRobotContainer {
 
     m_manipController.rightBumper().whileTrue(pickUpNote);
 
-    m_manipController.leftBumper().whileTrue(m_feeder.setFeed(RobotConstants.FEED_OUTTAKE_SPEED));
+    m_manipController.leftBumper().whileTrue(m_feeder.intake());
 
-    m_manipController.rightTrigger(0.5).whileTrue(m_feeder.setFeed(RobotConstants.FEED_FIRE_SPEED));
+    m_manipController.rightTrigger(0.5).whileTrue(m_feeder.shoot());
 
     m_testController.a().onTrue(m_Wrist.incrementUp());
 
