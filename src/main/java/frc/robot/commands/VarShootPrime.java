@@ -34,6 +34,9 @@ public class VarShootPrime extends Command {
   private final double heightLengthCoeff;
   private final double RPM_MPS;
 
+  public double theta;
+  public double v;
+
   /** Creates a new VarShootPrime. */
   public VarShootPrime(
       Wrist wrist,
@@ -77,8 +80,8 @@ public class VarShootPrime extends Command {
             - Units.inchesToMeters(elevator.getElevatorPos());
     // Calculate velocity based on lerping within the velocity range based on the distance range
     // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
-    double v = calcVel();
-    double theta = calcTheta(Constants.GRAVITY, l, h, v);
+    v = shooterVel + poseEstimator.getEstimatedVel().getX();
+    theta = calcTheta(Constants.GRAVITY, l, h, v);
     theta = Units.radiansToDegrees(theta);
     double modify = Util.lerp(l, distRange) * heightLengthCoeff;
     theta += modify;
@@ -89,10 +92,6 @@ public class VarShootPrime extends Command {
     Logger.recordOutput("VarShootPrime l", l);
 
     wrist.setToTarget(theta);
-  }
-
-  public double calcVel() {
-    return shooterVel + poseEstimator.getEstimatedVel().getX();
   }
 
   // Source? It was revealed to me by a wise tree in a dream

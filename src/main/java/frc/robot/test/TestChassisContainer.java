@@ -166,11 +166,11 @@ class TestChassisContainer {
                       "Aiming angle",
                       new Pose2d(
                           m_poseEstimator.getFusedPose().getTranslation(),
-                          Rotation2d.fromRadians(angle)));
+                          Rotation2d.fromRadians(angle + Math.PI)));
                   //   angle *=
                   //       m_poseEstimator.getEstimatedVel().getY()
                   //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
-                  return angle;
+                  return angle + Math.PI;
                 },
                 m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.ROTATION_PID,
