@@ -23,14 +23,12 @@ public final class Constants {
   public static final double UP_ADJUST = 0.5;
   public static final double DOWN_ADJUST = 0.25;
 
-  public static final Translation2d BLUE_ORBIT_POSE = new Translation2d(0, 5.5);
-  public static final Translation2d RED_ORBIT_POSE = new Translation2d(16.5, 5.5);
   // TODO should revise and precisely measure these values, they are estimates
   public static final Translation2d BLUE_SPEAKER_POSE =
       new Translation2d(Meters.of(0), Meters.of(5.5));
   public static final Translation2d RED_SPEAKER_POSE =
       new Translation2d(Meters.of(16.5), Meters.of(5.5));
-  public static Measure<Distance> SPEAKER_HEIGHT = Meters.of(2.1);
+  public static Measure<Distance> SPEAKER_HEIGHT = Meters.of(2.1); // is adjusted, not real
 
   public static final Transform2d BLUE_AMP =
       new Transform2d(Meters.of(1.83), Meters.of(7.47), Rotation2d.fromDegrees(90));

@@ -137,12 +137,12 @@ class CompetitionRobotContainer {
     pickUpNote =
         m_intake
             .intakeCommand()
-            .alongWith(m_Wrist.setToTarget(55)) // new intake angle (stow is 55 as well, but
+            .alongWith(m_Wrist.setToTargetCmd(55)) // new intake angle (stow is 55 as well, but
             // calling it here due to auto
             // using other positions)
             .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
             .until(m_feeder::isNoteQueued);
-    AmpSetUp = (m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)));
+    AmpSetUp = (m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)));
 
     varShootPrimeCmd =
         new VarShootPrime(
@@ -160,7 +160,7 @@ class CompetitionRobotContainer {
         "ScoreFromW2",
         m_Shooter
             .setSpeed(RobotConstants.AUTO_SHOOT_SPEED)
-            .alongWith(m_Wrist.setToTarget(RobotConstants.WRIST_W2_TARGET))
+            .alongWith(m_Wrist.setToTargetCmd(RobotConstants.WRIST_W2_TARGET))
             .andThen(Commands.waitUntil(m_Wrist::isAtTarget).withTimeout(1)));
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setSpeed(RobotConstants.AUTO_SHOOT_SPEED));
@@ -261,14 +261,15 @@ class CompetitionRobotContainer {
                 () -> {
                   Translation2d target =
                       DriverStation.getAlliance().get() == DriverStation.Alliance.Red
-                          ? Constants.RED_ORBIT_POSE
-                          : Constants.BLUE_ORBIT_POSE;
+                          ? Constants.RED_SPEAKER_POSE
+                          : Constants.BLUE_SPEAKER_POSE;
                   double angle =
                       target
                               .minus(m_poseEstimator.getFusedPose().getTranslation())
                               .getAngle()
                               .getRadians()
                           + Math.PI;
+                  Logger.recordOutput("Aiming angle", angle);
                   //   angle *=
                   //       m_poseEstimator.getEstimatedVel().getY()
                   //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
@@ -319,7 +320,7 @@ class CompetitionRobotContainer {
 
     m_manipController
         .leftTrigger(0.5)
-        .whileTrue(m_Shooter.setSpeed(500))
+        .whileTrue(m_Shooter.setSpeed(5000))
         .whileFalse(m_Shooter.setSpeed(0));
     // TODO switch the variable code onto left trigger
 
@@ -330,11 +331,24 @@ class CompetitionRobotContainer {
     // .onFalse(m_Wrist.stow());
 
     new Trigger(m_feeder::isNoteQueued)
-        .onTrue(Commands.runOnce(() -> m_Wrist.setDefaultCommand(varShootPrimeCmd)))
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    m_Wrist.setDefaultCommand(
+                        new VarShootPrime(
+                            m_Wrist,
+                            m_Elevator,
+                            m_poseEstimator,
+                            RobotConstants.SHOOT_POINT,
+                            RobotConstants.SHOOTER_VEL,
+                            RobotConstants.DISTANCE_RANGE,
+                            RobotConstants.HEIGHT_LENGTH_COEFF,
+                            RobotConstants.SHOOTER_RPM_TO_MPS))))
         .onFalse(
             Commands.runOnce(
                 () ->
-                    m_Wrist.setDefaultCommand(m_Wrist.setToTarget(RobotConstants.WRIST_HIGH_LIM))));
+                    m_Wrist.setDefaultCommand(
+                        m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM))));
 
     // Where did the old spinup bind go?
     m_manipController
@@ -349,7 +363,7 @@ class CompetitionRobotContainer {
         .y()
         .whileTrue(
             m_Wrist
-                .setToTarget(110)
+                .setToTargetCmd(19)
                 .alongWith(m_Elevator.setToTarget(13.9))); // Sets to AMP // sets to STOW
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 

@@ -35,7 +35,7 @@ class RobotConstants {
   public static final String AT_CAMERA_NAME = "Arducam_OV9281_USB_Camera";
   public static final Transform3d CAM1_OFFSET =
       new Transform3d(
-          new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
+          new Translation3d(-4.5, 0, 17.902).times(Units.inchesToMeters(1)),
           new Rotation3d(0, Math.toRadians(-30), Math.PI)); // TODO
 
   public static final Matrix<N3, N1> STATE_STD_DEVS = VecBuilder.fill(0.1, 0.1, 0.1); // TODO
@@ -139,9 +139,9 @@ class RobotConstants {
 
   // Time of flight sensor range of interest
   public static final Range2D<Integer> TOF_RANGE = new Range2D<Integer>(10, 10, 11, 11);
-  public static final double FEED_SENSOR_THRESHOLD = 200;
+  public static final double FEED_SENSOR_THRESHOLD = 300;
 
-  public static final double FEED_INTAKE_SPEED = 0.3;
+  public static final double FEED_INTAKE_SPEED = 0.15;
   public static final double FEED_OUTTAKE_SPEED = -1;
   public static final double FEED_FIRE_SPEED = 1;
 
@@ -157,8 +157,8 @@ class RobotConstants {
           new Range(-1, 1),
           new PIDConstants(0, 0, 0),
           new PIDConstants(0, 0, 0),
-          new FFConstants(0.16, 0.1065, 0.0, 0.0),
-          new FFConstants(0.14, 0.1065, 0.0, 0.0));
+          new FFConstants(0.015904, 0.11136, 0.011126, 0.0),
+          new FFConstants(0.021249, 0.11118, 0.00941906, 0.0));
 
   // Wrist Constants
   public static final int WRIST_ID = 13;
@@ -176,12 +176,12 @@ class RobotConstants {
 
   public static final double SPEAKER_AIM_VEL_COEFF = 0.0; // Multiplies m/s into radians
   // AUTO WRIST
-  public static final Translation2d SHOOT_POINT = new Translation2d(0, 0.6); // TODO
+  public static final Translation2d SHOOT_POINT = new Translation2d(0, 0.56); // TODO
   public static final double SHOOTER_RPM_TO_MPS =
       (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
   //   public static final Range VELOCITY_RANGE =
   //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
-  public static final double SHOOTER_VEL = 5000; // RPM
-  public static final Range DISTANCE_RANGE = new Range(1.25, 3);
-  public static final double HEIGHT_LENGTH_COEFF = 0.5;
+  public static final double SHOOTER_VEL = 6000; // RPM
+  public static final Range DISTANCE_RANGE = new Range(1.25, 5);
+  public static final double HEIGHT_LENGTH_COEFF = 0.55;
 }

@@ -4,6 +4,7 @@
 
 package frc.robot.competition;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
@@ -53,6 +54,8 @@ public class Robot extends LoggedRobot {
     }
 
     Logger.start();
+    // CTRE logger
+    SignalLogger.setPath("/media/sda1/ctre-logs/");
     m_robotContainer = new CompetitionRobotContainer();
 
     // Driver camera
