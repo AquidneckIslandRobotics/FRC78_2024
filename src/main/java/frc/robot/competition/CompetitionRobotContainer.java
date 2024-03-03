@@ -7,6 +7,7 @@ package frc.robot.competition;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.net.PortForwarder;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
+import frc.robot.classes.CalcAimAngle;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
 import frc.robot.commands.OrbitalTarget;
@@ -41,6 +43,7 @@ import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
@@ -62,6 +65,8 @@ class CompetitionRobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final Command pickUpNote;
   private final Command AmpSetUp;
+  private final VarShootPrime varShootPrime;
+  ;
 
   CompetitionRobotContainer() {
 
@@ -136,6 +141,17 @@ class CompetitionRobotContainer {
             // using other positions)
             .deadlineWith(m_feeder.intake());
     AmpSetUp = (m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)));
+
+    varShootPrime =
+        new VarShootPrime(
+            m_Wrist,
+            m_Elevator,
+            m_poseEstimator,
+            RobotConstants.SHOOT_POINT,
+            RobotConstants.SHOOTER_VEL,
+            RobotConstants.DISTANCE_RANGE,
+            RobotConstants.HEIGHT_LENGTH_COEFF,
+            RobotConstants.SHOOTER_RPM_TO_MPS);
 
     NamedCommands.registerCommand("Intake", pickUpNote);
     NamedCommands.registerCommand(
@@ -231,6 +247,7 @@ class CompetitionRobotContainer {
                 m_poseEstimator,
                 () -> Constants.ORBIT_RADIUS,
                 RobotConstants.ORBITAL_FF_CONSTANT));
+
     m_driveController
         .leftBumper()
         .whileTrue(
@@ -238,17 +255,25 @@ class CompetitionRobotContainer {
                 m_chassis,
                 m_poseEstimator,
                 () -> {
-                  Translation2d target =
-                      DriverStation.getAlliance().get() == DriverStation.Alliance.Red
-                          ? Constants.RED_SPEAKER_POSE
-                          : Constants.BLUE_SPEAKER_POSE;
+                  Supplier<Translation2d> target =
+                      () ->
+                          DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+                              ? Constants.RED_SPEAKER_POSE
+                              : Constants.BLUE_SPEAKER_POSE;
+
                   double angle =
-                      target
-                              .minus(m_poseEstimator.getFusedPose().getTranslation())
-                              .getAngle()
-                              .getRadians()
-                          + Math.PI;
-                  Logger.recordOutput("Aiming angle", angle);
+                      CalcAimAngle.calcAimAngle(
+                          target,
+                          m_poseEstimator::getFusedPose,
+                          m_poseEstimator::getEstimatedVel,
+                          () -> varShootPrime.calcVel(),
+                          () -> 45,
+                          1);
+                  Logger.recordOutput(
+                      "Aiming angle",
+                      new Pose2d(
+                          m_poseEstimator.getFusedPose().getTranslation(),
+                          Rotation2d.fromRadians(angle)));
                   //   angle *=
                   //       m_poseEstimator.getEstimatedVel().getY()
                   //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
@@ -258,6 +283,7 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF));
+
     m_driveController
         .a()
         .or(m_driveController.b())
@@ -310,19 +336,7 @@ class CompetitionRobotContainer {
     // .onFalse(m_Wrist.stow());
 
     new Trigger(m_feeder::isNoteQueued)
-        .onTrue(
-            Commands.runOnce(
-                () ->
-                    m_Wrist.setDefaultCommand(
-                        new VarShootPrime(
-                            m_Wrist,
-                            m_Elevator,
-                            m_poseEstimator,
-                            RobotConstants.SHOOT_POINT,
-                            RobotConstants.SHOOTER_VEL,
-                            RobotConstants.DISTANCE_RANGE,
-                            RobotConstants.HEIGHT_LENGTH_COEFF,
-                            RobotConstants.SHOOTER_RPM_TO_MPS))))
+        .onTrue(Commands.runOnce(() -> m_Wrist.setDefaultCommand(varShootPrime)))
         .onFalse(
             Commands.runOnce(
                 () ->
