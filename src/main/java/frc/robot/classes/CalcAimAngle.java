@@ -12,7 +12,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /** Add your docs here. */
-public class CalcAimAngle {
+public final class CalcAimAngle {
   public static double calcAimAngle(
       Supplier<Translation2d> speakerTranslation,
       Supplier<Pose2d> robotPose,

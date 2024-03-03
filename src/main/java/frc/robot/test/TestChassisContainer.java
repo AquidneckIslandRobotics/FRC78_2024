@@ -6,6 +6,7 @@ package frc.robot.test;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.net.PortForwarder;
@@ -17,12 +18,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.classes.BaseDrive;
+import frc.robot.classes.CalcAimAngle;
 import frc.robot.commands.*;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
@@ -120,20 +123,59 @@ class TestChassisContainer {
   private void configureBindings() {
     m_driveController
         .start()
-        .onTrue(new InstantCommand(() -> m_poseEstimator.resetPose(new Pose2d())));
+        .onTrue(
+            new InstantCommand(
+                () ->
+                    m_poseEstimator.resetPose(
+                        new Pose2d(1.25, 5.55, Rotation2d.fromRadians(Math.PI)))));
+    // m_driveController
+    //     .leftBumper()
+    //     .whileTrue(
+    //         new OrbitalTarget(
+    //             m_chassis,
+    //             m_baseDrive::calculateChassisSpeeds,
+    //             RobotConstants.TRANSLATION_PID,
+    //             RobotConstants.ROTATION_PID,
+    //             RobotConstants.MOTION_LIMITS,
+    //             m_poseEstimator,
+    //             () -> Constants.ORBIT_RADIUS,
+    //             RobotConstants.ORBITAL_FF_CONSTANT));
+
     m_driveController
         .leftBumper()
         .whileTrue(
-            new OrbitalTarget(
+            new FieldOrientedWithCardinal(
                 m_chassis,
-                m_baseDrive::calculateChassisSpeeds,
-                RobotConstants.TRANSLATION_PID,
-                RobotConstants.ROTATION_PID,
-                RobotConstants.MOTION_LIMITS,
                 m_poseEstimator,
-                () -> Constants.ORBIT_RADIUS,
-                RobotConstants.ORBITAL_FF_CONSTANT));
+                () -> {
+                  Supplier<Translation2d> target =
+                      () ->
+                          DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+                              ? Constants.RED_SPEAKER_POSE
+                              : Constants.BLUE_SPEAKER_POSE;
 
+                  double angle =
+                      CalcAimAngle.calcAimAngle(
+                          target,
+                          m_poseEstimator::getFusedPose,
+                          m_poseEstimator::getEstimatedVel,
+                          () -> 18,
+                          () -> 45,
+                          1);
+                  Logger.recordOutput(
+                      "Aiming angle",
+                      new Pose2d(
+                          m_poseEstimator.getFusedPose().getTranslation(),
+                          Rotation2d.fromRadians(angle)));
+                  //   angle *=
+                  //       m_poseEstimator.getEstimatedVel().getY()
+                  //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
+                  return angle;
+                },
+                m_baseDrive::calculateChassisSpeeds,
+                RobotConstants.ROTATION_PID,
+                RobotConstants.ROTATION_CONSTRAINTS,
+                RobotConstants.ROTATION_FF));
     m_driveController
         .rightBumper()
         .whileTrue(
