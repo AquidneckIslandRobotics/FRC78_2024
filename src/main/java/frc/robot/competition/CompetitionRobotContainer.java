@@ -62,7 +62,6 @@ class CompetitionRobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final Command pickUpNote;
   private final Command AmpSetUp;
-  private final Command varShootPrimeCmd;
 
   CompetitionRobotContainer() {
 
@@ -143,17 +142,6 @@ class CompetitionRobotContainer {
             .alongWith(m_feeder.setFeed(RobotConstants.FEED_INTAKE_SPEED))
             .until(m_feeder::isNoteQueued);
     AmpSetUp = (m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)));
-
-    varShootPrimeCmd =
-        new VarShootPrime(
-            m_Wrist,
-            m_Elevator,
-            m_poseEstimator,
-            RobotConstants.SHOOT_POINT,
-            RobotConstants.SHOOTER_VEL,
-            RobotConstants.DISTANCE_RANGE,
-            RobotConstants.HEIGHT_LENGTH_COEFF,
-            RobotConstants.SHOOTER_RPM_TO_MPS);
 
     NamedCommands.registerCommand("Intake", pickUpNote);
     NamedCommands.registerCommand(
