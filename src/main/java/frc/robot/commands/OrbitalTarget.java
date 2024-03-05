@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,13 +14,16 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.classes.Structs;
 import frc.robot.classes.Util;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.PoseEstimator;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,7 +32,7 @@ public class OrbitalTarget extends Command {
   private final Chassis chassis;
   private final PoseEstimator poseEstimator;
 
-  private final Supplier<Translation2d> speakerPose;
+  private Translation2d speakerPose;
 
   private final Supplier<ChassisSpeeds> speedsSupplier;
   private final ProfiledPIDController xController;
@@ -37,7 +42,7 @@ public class OrbitalTarget extends Command {
 
   private Rotation2d goalRotation;
 
-  private DoubleSupplier orbitDistance;
+  private Supplier<Measure<Distance>> orbitDistance;
 
   public OrbitalTarget(
       Chassis chassis,
@@ -46,7 +51,7 @@ public class OrbitalTarget extends Command {
       PIDConstants rotationPID,
       Structs.MotionLimits motionLimits,
       PoseEstimator poseEstimator,
-      DoubleSupplier orbitDistance,
+      Supplier<Measure<Distance>> orbitDistance,
       double rotationFFCoefficient) {
 
     this.chassis = chassis;
@@ -54,8 +59,6 @@ public class OrbitalTarget extends Command {
     this.speedsSupplier = speedsSupplier;
     this.orbitDistance = orbitDistance;
     this.rotationFFCoefficient = rotationFFCoefficient;
-
-    this.speakerPose = Constants.SPEAKER_TRANSLATION;
 
     Constraints constraints = new Constraints(motionLimits.maxSpeed, motionLimits.maxAcceleration);
     xController =
@@ -79,6 +82,12 @@ public class OrbitalTarget extends Command {
     xController.reset(robotPose.getX(), vel.getX());
     yController.reset(robotPose.getY(), vel.getY());
     rotController.reset(robotPose.getRotation().getRadians(), vel.getRotation().getRadians());
+    speakerPose =
+        DriverStation.getAlliance().isPresent()
+            ? (DriverStation.getAlliance().get() == Alliance.Red
+                ? Constants.RED_SPEAKER_POSE
+                : Constants.BLUE_SPEAKER_POSE)
+            : Constants.BLUE_SPEAKER_POSE;
   }
 
   @Override
@@ -109,7 +118,7 @@ public class OrbitalTarget extends Command {
     /*  The goal position is normalized and scaled by the orbit distance, then added to the speaker
     position to get a goal position that is radius distance away from the speaker in the direction of the robot*/
     goalPosition = Util.normalize(goalPosition);
-    goalPosition = goalPosition.times(orbitDistance.getAsDouble());
+    goalPosition = goalPosition.times(orbitDistance.get().in(Meters));
     goalPosition = goalPosition.plus(speakerPose);
 
     xController.setGoal(goalPosition.getX());

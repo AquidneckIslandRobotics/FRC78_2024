@@ -30,6 +30,7 @@ class TestChassisContainer {
   private final BaseDrive m_baseDrive;
   public final PoseEstimator m_poseEstimator;
   private final CommandXboxController m_driveController;
+  private final CommandXboxController m_manipController;
   private final SendableChooser<Command> autoChooser;
 
   TestChassisContainer() {
@@ -47,7 +48,9 @@ class TestChassisContainer {
 
     SwerveDriveKinematics swerveDriveKinematics = getSwerveDriveKinematics();
 
-    m_chassis = new Chassis(modules, swerveDriveKinematics);
+    m_chassis = new Chassis(modules, swerveDriveKinematics, RobotConstants.MOTION_LIMITS);
+
+    m_manipController = new CommandXboxController(0);
 
     m_poseEstimator =
         new PoseEstimator(
@@ -169,7 +172,10 @@ class TestChassisContainer {
                 m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
-                RobotConstants.ROTATION_FF));
+                RobotConstants.ROTATION_FF,
+                0));
+
+    m_manipController.leftTrigger().whileTrue(new DriveToNote(m_chassis));
   }
 
   public Command getAutonomousCommand() {

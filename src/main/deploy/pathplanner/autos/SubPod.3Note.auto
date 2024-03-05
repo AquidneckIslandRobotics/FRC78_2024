@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4448129467687512,
-      "y": 5.566684809560096
+      "x": 1.2415351306893094,
+      "y": 4.253197382585242
     },
-    "rotation": 0.9548412538721408
+    "rotation": -16.504361381755025
   },
   "command": {
     "type": "sequential",
@@ -36,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Center.CenterNote"
+                  "pathName": "SourceSide.SpeakerNote"
                 }
               },
               {
@@ -57,7 +57,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0
           }
         },
         {
@@ -73,7 +73,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CenterNote.AmpNote"
+                  "pathName": "W1.W2"
                 }
               },
               {
@@ -86,22 +86,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AmpfromCentScr"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartShooter"
-                }
-              }
-            ]
+            "name": "ScoreFromW2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {

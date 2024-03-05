@@ -18,12 +18,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Score"
@@ -49,22 +43,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "W1.Score"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartShooter"
-                }
-              }
-            ]
+            "name": "Target"
           }
         },
         {

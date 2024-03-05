@@ -22,9 +22,12 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
@@ -80,7 +83,14 @@ public class Elevator extends SubsystemBase {
     elevNeoMotor1.setInverted(false);
     elevNeoMotor2.follow(elevNeoMotor1, true);
 
+    Util.setRevStatusRates(elevNeoMotor1, 5, 20, 20, 65535, 65535, 65535, 65535, 65535);
+    Util.setRevStatusRates(elevNeoMotor2, 500, 65535, 65535, 65535, 65535, 65535, 65535, 65535);
+
     this.setDefaultCommand(setToTarget(0));
+    SmartDashboard.putData(enableCoastMode());
+    SmartDashboard.putData(enableBrakeMode());
+    SmartDashboard.putData("Elevator Profile", profiledPid);
+    SmartDashboard.putData(this);
   }
 
   public boolean elevatorIsStowed() {
@@ -98,17 +108,18 @@ public class Elevator extends SubsystemBase {
           profiledPid.setGoal(0);
           elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, true);
           elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, true);
-          elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 15);
+          elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 16.4f);
           elevNeoMotor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
           zeroed = true;
-          this.setDefaultCommand(setToTarget(.25));
+          this.setDefaultCommand(setToTarget(0));
         });
   }
 
   public Command zeroElevator() {
     return lowerElevatorUntilLimitReached()
         .andThen(configureMotorsAfterZeroing())
-        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming);
+        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+        .withName("Zero Elevator");
   }
 
   /** Manually move elevator up by gradually moving the setpoint. */
@@ -127,6 +138,28 @@ public class Elevator extends SubsystemBase {
                 encoder.getPosition() - manualSpeed.times(kDt).in(InchesPerSecond)));
   }
 
+  public Command enableCoastMode() {
+    return Commands.runOnce(
+            () -> {
+              elevNeoMotor1.setIdleMode(IdleMode.kCoast);
+              elevNeoMotor2.setIdleMode(IdleMode.kCoast);
+            })
+        .andThen(new PrintCommand("Coast Mode Set On Elevator"))
+        .ignoringDisable(true)
+        .withName("Enable Elevator Coast");
+  }
+
+  public Command enableBrakeMode() {
+    return Commands.runOnce(
+            () -> {
+              elevNeoMotor1.setIdleMode(IdleMode.kBrake);
+              elevNeoMotor2.setIdleMode(IdleMode.kBrake);
+            })
+        .andThen(new PrintCommand("Brake Mode Set On Elevator"))
+        .ignoringDisable(true)
+        .withName("Enable Elevator Brake");
+  }
+
   public void periodic() {
     Logger.recordOutput("Elevator/limit pressed", !reverseLimitSwitch.get());
     Logger.recordOutput("Elevator/zeroed", zeroed);
@@ -139,6 +172,10 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/Profile Velocity", profiledPid.getSetpoint().velocity);
     Logger.recordOutput("Elevator/AppliedVoltage", appliedOutput);
     Logger.recordOutput("Elevator/Goal", profiledPid.getSetpoint().position);
+  }
+
+  public double getElevatorPos() {
+    return encoder.getPosition();
   }
 
   /** Moves elevator to target as long as elevator is zeroed */
@@ -157,6 +194,7 @@ public class Elevator extends SubsystemBase {
                               MetersPerSecond.of(profiledPid.getSetpoint().velocity)
                                   .in(InchesPerSecond));
                   elevNeoMotor1.setVoltage(appliedOutput);
-                }));
+                }))
+        .withName("setTo[" + target + "]");
   }
 }

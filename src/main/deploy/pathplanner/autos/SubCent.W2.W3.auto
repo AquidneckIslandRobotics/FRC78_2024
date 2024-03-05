@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.4448129467687512,
+      "y": 5.566684809560096
     },
-    "rotation": 35.53767779197434
+    "rotation": 0.9548412538721408
   },
   "command": {
     "type": "sequential",
@@ -36,7 +36,44 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpSide.AmpNote"
+                  "pathName": "Center.CenterNote"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreFromW2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CenterNote.AmpNote"
                 }
               },
               {
@@ -55,7 +92,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpTarget1"
+                  "pathName": "AmpfromCentScr"
                 }
               },
               {
@@ -68,32 +105,14 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Score"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StopShooter"
           }
         }
       ]
     }
   },
-  "folder": "2NoteAutos",
+  "folder": "The L Autos",
   "choreoAuto": false
 }

@@ -4,52 +4,65 @@
 
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.classes.Structs.Range;
-import frc.robot.classes.Util;
 import frc.robot.constants.Constants;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.chassis.PoseEstimator;
-import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class VarShootPrime extends Command {
   private Wrist wrist;
-  private Shooter shooter;
+  private Elevator elevator;
   private PoseEstimator poseEstimator;
-  private Supplier<Translation2d> speakerTranslation;
+  private Translation2d speakerTranslation;
 
   // Translation of where the note exits in the XZ plane (side view)
   private final Translation2d shooterXZTrans;
 
-  private final Range velRange; // Range of velocity from min distance to max distance
+  private final double shooterVel; // Range of velocity from min distance to max distance
   private final Range distRange; // Range of distance from min distance to max distance
-  private final double thetaCoeff;
+  private final double heightLengthCoeff;
   private final double RPM_MPS;
 
   /** Creates a new VarShootPrime. */
   public VarShootPrime(
       Wrist wrist,
-      Shooter shooter,
+      Elevator elevator,
       PoseEstimator poseEstimator,
       Translation2d shooterXZTrans,
-      Range velRange,
+      double shooterVel,
       Range distRange,
       double thetaCoeff,
       double RPM_MPS) {
     this.wrist = wrist;
-    this.shooter = shooter;
+    this.elevator = elevator;
     this.poseEstimator = poseEstimator;
-    this.speakerTranslation = Constants.SPEAKER_TRANSLATION;
     this.shooterXZTrans = shooterXZTrans;
-    this.velRange = velRange;
+    this.shooterVel = shooterVel;
     this.distRange = distRange;
-    this.thetaCoeff = thetaCoeff;
+    this.heightLengthCoeff = thetaCoeff;
     this.RPM_MPS = RPM_MPS;
 
-    addRequirements(wrist, shooter);
+    addRequirements(wrist);
+  }
+
+  @Override
+  public void initialize() {
+    speakerTranslation =
+        DriverStation.getAlliance().isPresent()
+            ? (DriverStation.getAlliance().get() == Alliance.Red
+                ? Constants.RED_SPEAKER_POSE
+                : Constants.BLUE_SPEAKER_POSE)
+            : Constants.BLUE_SPEAKER_POSE;
   }
 
   @Override
@@ -57,19 +70,35 @@ public class VarShootPrime extends Command {
     Pose2d pose = poseEstimator.getFusedPose();
 
     // Distance and height to speaker
-    double h = Constants.SPEAKER_HEIGHT - shooterXZTrans.getY();
-    double l = pose.getTranslation().getDistance(speakerTranslation.get()) - shooterXZTrans.getX();
+    double l = pose.getTranslation().getDistance(speakerTranslation) - shooterXZTrans.getX();
+    double h =
+        (Constants.SPEAKER_HEIGHT.in(Meters) - shooterXZTrans.getY())
+            - Units.inchesToMeters(elevator.getElevatorPos())
+            + .4;
     // Calculate velocity based on lerping within the velocity range based on the distance range
-    double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
+    // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
+    double v = shooterVel;
     double theta = calcTheta(Constants.GRAVITY, l, h, v);
-    wrist.setToTarget(theta * thetaCoeff);
-    shooter.setPIDReferenceBOTH(v / RPM_MPS);
+    theta = Units.radiansToDegrees(theta);
+    // double modify = Util.lerp(l, distRange) * heightLengthCoeff;
+    // theta += modify;
+    Logger.recordOutput("VarShootPrime theta", theta);
+    // Logger.recordOutput("VarShootPrime modify", modify);
+    Logger.recordOutput("VarShootPrime h", h);
+    Logger.recordOutput("VarShootPrime v", v);
+    Logger.recordOutput("VarShootPrime l", l);
+
+    wrist.setToTarget(theta);
   }
 
   // Source? It was revealed to me by a wise tree in a dream
+  // JK this https://en.wikipedia.org/wiki/Projectile_motion
   private double calcTheta(double g, double l, double h, double v) {
-    double nominator = v * v - Math.sqrt(Math.pow(v, 4) - g * ((g * l * l) + (2 * h * v * v)));
-    double denominator = g * l;
-    return Math.atan(nominator / denominator);
+    return Math.atan(h / l);
+    // double sqrt = Math.pow(v, 4) - (g * ((g * l * l) + (2 * h * v * v)));
+    // double numerator = (v * v) - Math.sqrt(sqrt);
+    // double denominator = g * l;
+
+    // return Math.atan(numerator / denominator);
   }
 }

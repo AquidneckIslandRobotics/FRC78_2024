@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.2258983756062753,
+      "y": 6.801988461119779
     },
     "rotation": 32.19573393471324
   },
@@ -20,13 +20,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AmpNote.MID1"
+            "pathName": "W3.C5"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "MID1.AMPside"
+            "pathName": "C5.4NoteScore"
           }
         }
       ]

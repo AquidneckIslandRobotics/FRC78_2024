@@ -58,8 +58,8 @@ class RobotConstants {
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
         CAMS[0],
         new Transform3d(
-            new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
-            new Rotation3d(0, Math.toRadians(-30), 0))),
+          new Translation3d(-4.5, 0, 17.902).times(Units.inchesToMeters(1)),
+          new Rotation3d(0, Math.toRadians(-30), Math.PI))),
     new PhotonPoseEstimator(
         APRIL_TAG_FIELD_LAYOUT,
         PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -74,7 +74,7 @@ class RobotConstants {
   public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8);
   public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1);
 
-  public static final MotionLimits MOTION_LIMITS = new MotionLimits(5.6, 3 /*TODO */, 8, 12);
+  public static final MotionLimits MOTION_LIMITS = new MotionLimits(5.6, 3 /*TODO */, 12, 18);
 
   public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG =
       new HolonomicPathFollowerConfig(
@@ -82,13 +82,13 @@ class RobotConstants {
           new PIDConstants(2, 0.0, 0.0), // Rotation PID constants
           RobotConstants.MOTION_LIMITS.maxSpeed, // Max module speed, in m/s
           RobotConstants.ROBOT_RADIUS, // Drive$ base radius in meters
-          new ReplanningConfig() // Default path replanning config.
+          new ReplanningConfig(false, true) // Default path replanning config.
           );
   // TODO Since the above and below are both PID constants for moving the robot to
   // a target pose, perhaps we could use just one set of constants for both
   // Pathplanner and other drive commands?
   public static final PIDConstants TRANSLATION_PID = new PIDConstants(3.5, 0.0, 0.0);
-  public static final PIDConstants ROTATION_PID = new PIDConstants(3.5, 0.0, 0.0);
+  public static final PIDConstants ROTATION_PID = new PIDConstants(4.0, 0.0, 0.085);
   public static final Constraints ROTATION_CONSTRAINTS =
       new Constraints(MOTION_LIMITS.maxAngularSpeed, MOTION_LIMITS.maxAngularAcceleration);
   // TODO
@@ -170,11 +170,13 @@ class RobotConstants {
 
   // Time of flight sensor range of interest
   public static final Range2D<Integer> TOF_RANGE = new Range2D<Integer>(10, 10, 11, 11);
-  public static final double FEED_SENSOR_THRESHOLD = 160;
+  public static final double FEED_SENSOR_THRESHOLD = 300;
 
-  public static final double FEED_INTAKE_SPEED = 0.1;
+  public static final double FEED_INTAKE_SPEED = 0.15;
   public static final double FEED_OUTTAKE_SPEED = -1;
   public static final double FEED_FIRE_SPEED = 1;
+
+  public static final double WRIST_SUB_AUTO_POS = 50;
 
   public static final ShooterConfig SHOOTER_CONFIG =
       new ShooterConfig(
@@ -186,29 +188,30 @@ class RobotConstants {
           new Range(-1, 1),
           new PIDConstants(0, 0, 0),
           new PIDConstants(0, 0, 0),
-          new FFConstants(0.16, 0.1065, 0.0, 0.0),
-          new FFConstants(0.14, 0.1065, 0.0, 0.0));
+          new FFConstants(0.015904, 0.11136, 0.011126, 0.0),
+          new FFConstants(0.021249, 0.11118, 0.00941906, 0.0));
 
   // Wrist Constants
   public static final int WRIST_ID = 13;
 
-  public static final float WRIST_HIGH_LIM = 50;
+  public static final float WRIST_HIGH_LIM = 55;
   public static final float WRIST_LOW_LIM = 0;
 
   // CANDLE //
   public static final int CANDLE_ID = 1;
 
   // TODO auto stuff, but what for and is it needed?
-  public static final double AUTO_SHOOT_SPEED = 5000;
+  public static final double AUTO_SHOOT_SPEED = 5800;
   public static final double AUTO_WRIST_SETPOINT = 0;
   public static final double WRIST_W2_TARGET = 35;
 
   // AUTO WRIST
-  public static final Translation2d SHOOT_POINT = new Translation2d();
+  public static final Translation2d SHOOT_POINT = new Translation2d(0, 0.56); // TODO
   public static final double SHOOTER_RPM_TO_MPS =
-      (Math.PI * Units.inchesToMeters(2.5)) / 60; // Guess based on shooter wheel size
-  public static final Range VELOCITY_RANGE =
-      new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5000);
-  public static final Range DISTANCE_RANGE = new Range(1, 3);
-  public static final double THETA_COEFF = 1;
+      (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
+  //   public static final Range VELOCITY_RANGE =
+  //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
+  public static final double SHOOTER_VEL = 6000; // RPM
+  public static final Range DISTANCE_RANGE = new Range(1.25, 5);
+  public static final double HEIGHT_LENGTH_COEFF = 0.55;
 }

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.2337167531477924,
+      "y": 4.214105494877657
     },
-    "rotation": 35.53767779197434
+    "rotation": -47.489552921999184
   },
   "command": {
     "type": "sequential",
@@ -15,12 +15,6 @@
           "type": "named",
           "data": {
             "name": "StartShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
           }
         },
         {
@@ -36,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpSide.AmpNote"
+                  "pathName": "Pod.C1"
                 }
               },
               {
@@ -55,7 +49,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpTarget1"
+                  "pathName": "C1.Score"
                 }
               },
               {
@@ -68,9 +62,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.5
+            "name": "Target"
           }
         },
         {
@@ -80,20 +74,45 @@
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 0.5
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "W1.Score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "StopShooter"
+            "name": "StartShooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         }
       ]
     }
   },
-  "folder": "2NoteAutos",
+  "folder": "3 Note Sides",
   "choreoAuto": false
 }

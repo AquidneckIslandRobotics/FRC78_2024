@@ -18,6 +18,8 @@ public interface SwerveModule {
 
   public void initialize();
 
+  public void setBrake(Boolean y);
+
   public void resetEncoders();
 
   public double getDriveVelocity(); // Get current drive velocity from  (m/s)
@@ -45,4 +47,8 @@ public interface SwerveModule {
 
   /** Logs the motor position, velocity, and voltage data for SysId */
   void logMotor(SysIdRoutineLog log);
+
+  void enableBrakeMode();
+
+  void enableCoastMode();
 }

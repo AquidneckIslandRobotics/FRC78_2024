@@ -9,9 +9,10 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
@@ -28,6 +29,7 @@ import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.classes.Structs.FFConstants;
+import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
 
 /** Neo implementation of SwerveModule */
@@ -128,7 +130,8 @@ public class NeoModule implements SwerveModule {
     drive.setIdleMode(config.driveIdleMode);
     steer.setIdleMode(config.steerIdleMode);
 
-    steer.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20);
+    Util.setRevStatusRates(steer, 10, 20, 65535, 65535, 65535, 20, 65535, 65535);
+    Util.setRevStatusRates(drive, 10, 20, 20, 65535, 65535, 65535, 65535, 65535);
 
     // Save the SPARK MAX configurations. If a SPARK MAX browns out during
     // operation, it will maintain the above configurations.
@@ -143,6 +146,17 @@ public class NeoModule implements SwerveModule {
   @Override
   public void resetEncoders() {
     driveEnc.setPosition(0);
+  }
+
+  @Override
+  public void setBrake(Boolean y) {
+    if (y) {
+      drive.setIdleMode(IdleMode.kBrake);
+      steer.setIdleMode(IdleMode.kBrake);
+    } else {
+      drive.setIdleMode(IdleMode.kCoast);
+      steer.setIdleMode(IdleMode.kCoast);
+    }
   }
 
   /**
@@ -289,5 +303,17 @@ public class NeoModule implements SwerveModule {
         // the drive encoder has the necessary position and velocity conversion factors already set
         .linearVelocity(mutableVelocity.mut_replace(driveEnc.getVelocity(), MetersPerSecond))
         .linearPosition(mutableDistance.mut_replace(driveEnc.getPosition(), Meters));
+  }
+
+  @Override
+  public void enableBrakeMode() {
+    drive.setIdleMode(CANSparkBase.IdleMode.kBrake);
+    steer.setIdleMode(CANSparkBase.IdleMode.kBrake);
+  }
+
+  @Override
+  public void enableCoastMode() {
+    drive.setIdleMode(CANSparkBase.IdleMode.kCoast);
+    steer.setIdleMode(CANSparkBase.IdleMode.kCoast);
   }
 }

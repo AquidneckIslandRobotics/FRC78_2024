@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.2258983756062753,
+      "y": 6.801988461119779
     },
-    "rotation": 42.039063865836305
+    "rotation": 27.64597536373862
   },
   "command": {
     "type": "sequential",
@@ -18,9 +18,21 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.5
+            "name": "Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
           }
         },
         {
@@ -30,22 +42,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AmpSide.AmpNote"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "pathName": "W3.C5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
           }
         },
         {
@@ -55,7 +60,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "AmpTarget1"
+                  "pathName": "C5.4NoteScore"
                 }
               },
               {
@@ -70,51 +75,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Score"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AmpNote.MID1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "MID1.AMPside"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StartShooter"
-                }
-              }
-            ]
+            "name": "Target"
           }
         },
         {
