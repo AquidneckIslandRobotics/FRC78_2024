@@ -93,7 +93,6 @@ public class OrbitalTarget extends Command {
   @Override
   public void execute() {
     Pose2d robotPose = poseEstimator.getFusedPose();
-    Translation2d speakerPose = this.speakerPose.get();
 
     Translation2d goalPosition = robotPose.getTranslation().minus(speakerPose);
     /*

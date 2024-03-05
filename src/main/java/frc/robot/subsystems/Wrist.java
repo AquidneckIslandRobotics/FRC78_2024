@@ -85,11 +85,6 @@ public class Wrist extends SubsystemBase {
         });
   }
 
-  public void setToTarget(double target) {
-    this.target = target;
-    wristNeo.getPIDController().setReference(target, ControlType.kPosition);
-  }
-
   public Command stow() {
     return setToTargetCmd(stowPos).withName("Stow");
   }
