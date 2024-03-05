@@ -6,7 +6,9 @@ package frc.robot.competition;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -43,6 +45,7 @@ import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
@@ -217,6 +220,8 @@ class CompetitionRobotContainer {
         },
         m_chassis // Reference to this subsystem to set requirements
         );
+
+    PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -433,5 +438,24 @@ class CompetitionRobotContainer {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public Optional<Rotation2d> getRotationTargetOverride() {
+    if (m_feeder.isNoteQueued()) {
+      Translation2d target =
+          DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+              ? Constants.RED_SPEAKER_POSE
+              : Constants.BLUE_SPEAKER_POSE;
+      Rotation2d angle =
+          target
+              .minus(m_poseEstimator.getFusedPose().getTranslation())
+              .getAngle()
+              .plus(Rotation2d.fromDegrees(180));
+      Logger.recordOutput("Aiming angle", angle);
+
+      return Optional.of(angle);
+    } else {
+      return Optional.empty();
+    }
   }
 }
