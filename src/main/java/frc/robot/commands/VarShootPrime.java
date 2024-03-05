@@ -34,8 +34,8 @@ public class VarShootPrime extends Command {
   private final double heightLengthCoeff;
   private final double RPM_MPS;
 
-  public double theta;
-  public double v;
+  private double theta;
+  private double v;
 
   /** Creates a new VarShootPrime. */
   public VarShootPrime(
@@ -61,6 +61,8 @@ public class VarShootPrime extends Command {
 
   @Override
   public void initialize() {
+    theta = 0;
+    v = 0;
     speakerTranslation =
         DriverStation.getAlliance().isPresent()
             ? (DriverStation.getAlliance().get() == Alliance.Red
@@ -92,6 +94,14 @@ public class VarShootPrime extends Command {
     Logger.recordOutput("VarShootPrime l", l);
 
     wrist.setToTarget(theta);
+  }
+
+  public double getV() {
+    return v;
+  }
+  
+  public double getTheta() {
+    return theta;
   }
 
   // Source? It was revealed to me by a wise tree in a dream

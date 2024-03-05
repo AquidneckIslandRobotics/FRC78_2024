@@ -66,7 +66,6 @@ class CompetitionRobotContainer {
   private final Command pickUpNote;
   private final Command AmpSetUp;
   private final VarShootPrime varShootPrime;
-  ;
 
   CompetitionRobotContainer() {
 
@@ -266,8 +265,8 @@ class CompetitionRobotContainer {
                           target,
                           m_poseEstimator::getFusedPose,
                           m_poseEstimator::getEstimatedVel,
-                          () -> varShootPrime.v,
-                          () -> varShootPrime.theta,
+                          () -> varShootPrime.getV(),
+                          () -> varShootPrime.getTheta(),
                           1);
                   Logger.recordOutput(
                       "Aiming angle",
