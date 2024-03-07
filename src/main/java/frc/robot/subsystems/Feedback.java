@@ -14,9 +14,11 @@ import com.ctre.phoenix.led.RainbowAnimation;
 import com.ctre.phoenix.led.StrobeAnimation;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.classes.LimelightHelpers;
 
 public class Feedback extends SubsystemBase {
   /** Creates a new Feedback. */
@@ -25,23 +27,20 @@ public class Feedback extends SubsystemBase {
   public Feedback(int candleID) {
     bracelet = new CANdle(candleID);
     CANdleConfiguration config = new CANdleConfiguration();
-    config.stripType = LEDStripType.RGB; // set the strip type to RGB
     config.brightnessScalar = 0.5; // dim the LEDs to half brightness
     bracelet.configAllSettings(config);
-    this.off();
-    this.setDefaultCommand(this.setAllianceColor());
+    bracelet.configLEDType(LEDStripType.RGB);
+    this.setDefaultCommand(run(this::setAllianceColor));
+    SmartDashboard.putData(this);
   }
 
-  public Command setAllianceColor() {
-    return this.run(
-        () -> {
-          var a = DriverStation.getAlliance();
-          if (a.isPresent() & a.get().equals(Alliance.Red)) {
-            setMulti(Color.kRed);
-          } else {
-            setMulti(Color.kBlue);
-          }
-        });
+  private void setAllianceColor() {
+    var a = DriverStation.getAlliance().orElse(Alliance.Blue);
+    if (a == Alliance.Red) {
+      setMulti(Color.kRed);
+    } else {
+      setMulti(Color.kBlue);
+    }
   }
 
   public Command shooterWheelsAtSpeed() {
@@ -53,6 +52,13 @@ public class Feedback extends SubsystemBase {
           bracelet.animate(sa, 1);
         },
         this::off);
+  }
+
+  public void noNoteInLimelight() {
+    StrobeAnimation sa = new StrobeAnimation(255, 0, 0, 0, 0.3, 68);
+    bracelet.clearAnimation(1);
+    bracelet.clearAnimation(2);
+    bracelet.animate(sa, 1);
   }
 
   public Command noteInCartridge() {
@@ -67,6 +73,18 @@ public class Feedback extends SubsystemBase {
 
   public Command rainbows() {
     return this.startEnd(this::animate, this::off);
+  }
+
+  public Command showNoteAlignment() {
+    return this.run(
+        () -> {
+          String id = LimelightHelpers.getNeuralClassID("limelight");
+          if ("note".equals(id)) {
+            bracelet.setLEDs(0, 255, 0, 0, 8, 7);
+          } else {
+            bracelet.setLEDs(255, 0, 0, 0, 8, 7);
+          }
+        });
   }
 
   public Command intakeCurrentSpike() {
@@ -90,12 +108,12 @@ public class Feedback extends SubsystemBase {
   }
 
   public void disabledColorPattern() {
-    ColorFlowAnimation cfa = new ColorFlowAnimation(0, 0, 255, 255, 0.5, 68, Direction.Forward, 5);
+    ColorFlowAnimation cfa = new ColorFlowAnimation(0, 0, 255, 255, 0.5, 22, Direction.Forward, 8);
     bracelet.clearAnimation(1);
     bracelet.clearAnimation(2);
     bracelet.animate(cfa, 1);
     ColorFlowAnimation cfa2 =
-        new ColorFlowAnimation(255, 0, 0, 255, 0.5, 68, Direction.Backward, 0);
+        new ColorFlowAnimation(0, 255, 0, 255, 0.5, 22, Direction.Backward, 0);
     bracelet.animate(cfa2, 2);
   }
 
@@ -131,10 +149,10 @@ public class Feedback extends SubsystemBase {
         0,
         8);
     bracelet.setLEDs(
-        ((int) (color.green * 255)),
         ((int) (color.red * 255)),
+        ((int) (color.green * 255)),
         ((int) (color.blue * 255)),
-        127,
+        0,
         8,
         250);
   }
@@ -152,8 +170,8 @@ public class Feedback extends SubsystemBase {
               0,
               8);
           bracelet.setLEDs(
-              ((int) (color.green * 255)),
               ((int) (color.red * 255)),
+              ((int) (color.green * 255)),
               ((int) (color.blue * 255)),
               127,
               8,
