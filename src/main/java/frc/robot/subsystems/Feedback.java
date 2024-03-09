@@ -27,6 +27,7 @@ public class Feedback extends SubsystemBase {
   public Feedback(int candleID) {
     bracelet = new CANdle(candleID);
     CANdleConfiguration config = new CANdleConfiguration();
+    config.stripType = LEDStripType.RGB;
     config.brightnessScalar = 0.5; // dim the LEDs to half brightness
     bracelet.configAllSettings(config);
     bracelet.configLEDType(LEDStripType.RGB);

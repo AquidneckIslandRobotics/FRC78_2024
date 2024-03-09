@@ -262,7 +262,6 @@ class CompetitionRobotContainer {
     new Trigger(() -> m_Shooter.isAtSpeed(.9))
         .onTrue(shortRumble(m_manipController.getHID()))
         .whileTrue(m_feedback.shooterWheelsAtSpeed());
-
     m_driveController
         .start()
         .onTrue(new InstantCommand(() -> m_poseEstimator.resetPose(new Pose2d())));
