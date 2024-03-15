@@ -5,12 +5,13 @@
 package frc.robot.competition;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,7 +39,10 @@ public class Robot extends LoggedRobot {
   public void robotInit() {
 
     SmartDashboard.putData(CommandScheduler.getInstance());
+    PortForwarder.add(5800, "limelight.local", 5800);
+    PortForwarder.add(1181, "photonvision.local", 1181);
     if (isReal()) {
+      DataLogManager.start();
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       m_pdp = new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
@@ -55,7 +59,8 @@ public class Robot extends LoggedRobot {
 
     Logger.start();
     // CTRE logger
-    SignalLogger.setPath("/media/sda1/ctre-logs/");
+    SignalLogger.setPath("/U/ctre-logs/");
+    SignalLogger.start();
     m_robotContainer = new CompetitionRobotContainer();
 
     // Driver camera
@@ -93,18 +98,13 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void disabledInit() {
-    m_robotContainer.m_chassis.setBrake(false);
-  }
+  public void disabledInit() {}
 
   @Override
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {
-    m_robotContainer.m_chassis.setBrake(
-        RobotConstants.MODULE_CONFIG.driveIdleMode == IdleMode.kBrake);
-  }
+  public void disabledExit() {}
 
   @Override
   public void autonomousInit() {

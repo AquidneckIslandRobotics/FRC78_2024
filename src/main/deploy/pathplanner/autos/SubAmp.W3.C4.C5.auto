@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2258983756062753,
-      "y": 6.801988461119779
+      "x": 1.2102616205232415,
+      "y": 6.528345247166685
     },
-    "rotation": 27.64597536373862
+    "rotation": 47.082565279730886
   },
   "command": {
     "type": "sequential",
@@ -70,10 +70,40 @@
           "data": {
             "name": "Score"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4NoteScore.C4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C4.Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
         }
       ]
     }
   },
-  "folder": "3 Note Sides",
+  "folder": "4 Note Autos",
   "choreoAuto": false
 }

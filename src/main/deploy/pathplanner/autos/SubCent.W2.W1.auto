@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2258983756062753,
-      "y": 6.801988461119779
+      "x": 1.4448129467687512,
+      "y": 5.566684809560096
     },
-    "rotation": 27.64597536373862
+    "rotation": 0.0
   },
   "command": {
     "type": "sequential",
@@ -44,19 +44,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W3.C5"
+            "pathName": "CenterNote.StageNote"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "DriveToNote"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "C5.4NoteScore"
           }
         },
         {
@@ -74,6 +68,6 @@
       ]
     }
   },
-  "folder": "3 Note Sides",
+  "folder": "The L Autos",
   "choreoAuto": false
 }

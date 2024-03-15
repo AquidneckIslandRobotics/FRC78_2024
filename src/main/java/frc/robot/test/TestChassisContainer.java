@@ -218,7 +218,8 @@ class TestChassisContainer {
                 m_baseDrive::calculateChassisSpeeds,
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
-                RobotConstants.ROTATION_FF));
+                RobotConstants.ROTATION_FF,
+                0));
 
     m_manipController.leftTrigger().whileTrue(new DriveToNote(m_chassis));
   }

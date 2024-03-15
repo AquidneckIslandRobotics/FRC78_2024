@@ -52,7 +52,7 @@ public class Feedback extends SubsystemBase {
           bracelet.clearAnimation(2);
           bracelet.animate(sa, 1);
         },
-        this::setAllianceColor);
+        this::off);
   }
 
   public Command noteInCartridge() {

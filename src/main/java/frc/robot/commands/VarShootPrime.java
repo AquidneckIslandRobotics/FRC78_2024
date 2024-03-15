@@ -18,6 +18,7 @@ import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.chassis.PoseEstimator;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class VarShootPrime extends Command {
@@ -29,13 +30,14 @@ public class VarShootPrime extends Command {
   // Translation of where the note exits in the XZ plane (side view)
   private final Translation2d shooterXZTrans;
 
-  private final double shooterVel; // Range of velocity from min distance to max distance
+  private final DoubleSupplier shooterVel; // Range of velocity from min distance to max distance
   private final Range distRange; // Range of distance from min distance to max distance
   private final double heightLengthCoeff;
   private final double RPM_MPS;
 
   private double theta;
   private double v;
+  private final double defaultAngle;
 
   /** Creates a new VarShootPrime. */
   public VarShootPrime(
@@ -43,10 +45,11 @@ public class VarShootPrime extends Command {
       Elevator elevator,
       PoseEstimator poseEstimator,
       Translation2d shooterXZTrans,
-      double shooterVel,
+      DoubleSupplier shooterVel,
       Range distRange,
       double thetaCoeff,
-      double RPM_MPS) {
+      double RPM_MPS,
+      double defaultAngle) {
     this.wrist = wrist;
     this.elevator = elevator;
     this.poseEstimator = poseEstimator;
@@ -55,6 +58,7 @@ public class VarShootPrime extends Command {
     this.distRange = distRange;
     this.heightLengthCoeff = thetaCoeff;
     this.RPM_MPS = RPM_MPS;
+    this.defaultAngle = defaultAngle;
 
     addRequirements(wrist);
   }
@@ -82,8 +86,10 @@ public class VarShootPrime extends Command {
             - Units.inchesToMeters(elevator.getElevatorPos());
     // Calculate velocity based on lerping within the velocity range based on the distance range
     // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
-    v = shooterVel + poseEstimator.getEstimatedVel().getX();
-    theta = calcTheta(Constants.GRAVITY, l, h, v);
+    double v = shooterVel.getAsDouble() * RPM_MPS;
+    v += poseEstimator.getEstimatedVel().getX();
+    double theta = calcTheta(Constants.GRAVITY, l, h, v);
+    if (theta == Double.NaN) theta = defaultAngle;
     theta = Units.radiansToDegrees(theta);
     double modify = Util.lerp(l, distRange) * heightLengthCoeff;
     theta += modify;
@@ -99,7 +105,7 @@ public class VarShootPrime extends Command {
   public double getV() {
     return v;
   }
-  
+
   public double getTheta() {
     return theta;
   }

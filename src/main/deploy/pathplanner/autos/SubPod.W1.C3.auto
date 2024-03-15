@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2962637734799283,
-      "y": 6.590892267498821
+      "x": 1.2337167531477924,
+      "y": 4.214105494877657
     },
-    "rotation": 41.933514498874146
+    "rotation": -47.489552921999184
   },
   "command": {
     "type": "sequential",
@@ -18,9 +18,21 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.5
+            "name": "Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
           }
         },
         {
@@ -30,45 +42,38 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "AmpSide.AmpNote"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "pathName": "W1.C3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AmpSetUp"
+            "name": "DriveToNote"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "W3.AmpScr"
+            "pathName": "C3.Score"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreInAmp"
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         }
       ]
     }
   },
-  "folder": "AmpAutos",
+  "folder": "3 Note Sides",
   "choreoAuto": false
 }

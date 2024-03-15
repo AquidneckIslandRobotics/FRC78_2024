@@ -60,7 +60,7 @@ public class Elevator extends SubsystemBase {
           0,
           0,
           new TrapezoidProfile.Constraints(
-              InchesPerSecond.of(13), InchesPerSecond.per(Second).of(40)),
+              InchesPerSecond.of(15), InchesPerSecond.per(Second).of(80)),
           kDt);
 
   public Elevator() {
@@ -108,7 +108,7 @@ public class Elevator extends SubsystemBase {
           profiledPid.setGoal(0);
           elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, true);
           elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, true);
-          elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 15);
+          elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 16.4f);
           elevNeoMotor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
           zeroed = true;
           this.setDefaultCommand(setToTarget(0));
