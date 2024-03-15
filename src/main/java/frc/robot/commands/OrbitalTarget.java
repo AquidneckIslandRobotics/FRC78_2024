@@ -81,7 +81,7 @@ public class OrbitalTarget extends Command {
   @Override
   public void initialize() {
     Pose2d robotPose = poseEstimator.getFusedPose();
-    Transform2d vel = poseEstimator.getEstimatedVel();
+    Transform2d vel = poseEstimator.getEstimatedFOVel();
     xController.reset(robotPose.getX(), vel.getX());
     yController.reset(robotPose.getY(), vel.getY());
     rotController.reset(robotPose.getRotation().getRadians(), vel.getRotation().getRadians());

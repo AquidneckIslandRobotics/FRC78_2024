@@ -31,6 +31,7 @@ public class PoseEstimator {
 
   private final SwerveDrivePoseEstimator poseEstimator;
   private Transform2d vel;
+  private Transform2d FOVel;
   private Pose2d lastPose;
   private PhotonCamera ATCam1;
   private Pigeon2 pigeon;
@@ -102,7 +103,7 @@ public class PoseEstimator {
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRot()), chassis.getPositions());
     Pose2d currentPose = poseEstimator.getEstimatedPosition();
     vel = currentPose.minus(lastPose); // Why is this robot relative?
-    vel =
+    FOVel =
         new Transform2d(
             vel.getTranslation().rotateBy(currentPose.getRotation()), vel.getRotation());
 
@@ -110,7 +111,7 @@ public class PoseEstimator {
 
     SmartDashboard.putNumber("gyroYaw", getGyroRot());
     Logger.recordOutput("Estimated Pose", currentPose);
-    Logger.recordOutput("Estimated Velocity", getEstimatedVel());
+    Logger.recordOutput("Estimated Velocity", getEstimatedFOVel());
   }
 
   public Optional<EstimatedRobotPose> getEstimatedVisionPose() {
@@ -126,8 +127,12 @@ public class PoseEstimator {
     return poseEstimator.getEstimatedPosition();
   }
 
-  public Transform2d getEstimatedVel() {
-    return vel.div(0.02); // How consistent is this update rate?
+  public Transform2d getEstimatedFOVel() {
+    return FOVel.div(0.02); // How consistent is this update rate?
+  }
+
+  public Transform2d getEstimatedRRVel() {
+    return vel.div(0.02);
   }
 
   public PhotonPipelineResult getLatestResult() {

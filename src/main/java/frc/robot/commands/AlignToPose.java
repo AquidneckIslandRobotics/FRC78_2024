@@ -58,7 +58,7 @@ public class AlignToPose extends Command {
   @Override
   public void initialize() {
     Transform2d pose = targetTransform.get();
-    Transform2d vel = poseEstimator.getEstimatedVel();
+    Transform2d vel = poseEstimator.getEstimatedFOVel();
     xController.reset(pose.getTranslation().getX(), vel.getX());
     yController.reset(pose.getTranslation().getY(), vel.getY());
     thetaController.reset(pose.getRotation().getRadians(), vel.getRotation().getRadians());

@@ -73,7 +73,7 @@ public class FieldOrientedWithCardinal extends Command {
     }
     thetaPID.reset(
         poseEstimator.getFusedPose().getRotation().getRadians(),
-        poseEstimator.getEstimatedVel().getRotation().getRadians());
+        poseEstimator.getEstimatedFOVel().getRotation().getRadians());
   }
 
   @Override

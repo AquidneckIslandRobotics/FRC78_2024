@@ -46,7 +46,6 @@ import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
-import java.util.function.Supplier;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
@@ -143,10 +142,11 @@ class CompetitionRobotContainer {
             m_Elevator,
             m_poseEstimator,
             RobotConstants.SHOOT_POINT,
-            RobotConstants.SHOOTER_VEL,
+            () -> m_Shooter.getVelocity() * 60,
             RobotConstants.DISTANCE_RANGE,
             RobotConstants.HEIGHT_LENGTH_COEFF,
-            RobotConstants.SHOOTER_RPM_TO_MPS);
+            RobotConstants.SHOOTER_RPM_TO_MPS,
+            RobotConstants.WRIST_HIGH_LIM);
 
     NamedCommands.registerCommand("Intake", pickUpNote());
     NamedCommands.registerCommand(
@@ -315,12 +315,12 @@ class CompetitionRobotContainer {
                           : Constants.BLUE_SPEAKER_POSE;
                   double angle =
                       CalcAimAngle.calcAimAngle(
-                          target,
+                          () -> target,
                           m_poseEstimator::getFusedPose,
-                          m_poseEstimator::getEstimatedVel,
+                          m_poseEstimator::getEstimatedFOVel,
                           () -> varShootPrime.getV(),
                           () -> varShootPrime.getTheta(),
-                          1);
+                          1.0);
                   Logger.recordOutput(
                       "Aiming angle",
                       new Pose2d(

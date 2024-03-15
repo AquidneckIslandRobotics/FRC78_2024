@@ -18,14 +18,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.classes.BaseDrive;
-import frc.robot.classes.CalcAimAngle;
 import frc.robot.commands.*;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 
@@ -141,41 +139,41 @@ class TestChassisContainer {
     //             () -> Constants.ORBIT_RADIUS,
     //             RobotConstants.ORBITAL_FF_CONSTANT));
 
-    m_driveController
-        .leftBumper()
-        .whileTrue(
-            new FieldOrientedWithCardinal(
-                m_chassis,
-                m_poseEstimator,
-                () -> {
-                  Supplier<Translation2d> target =
-                      () ->
-                          DriverStation.getAlliance().get() == DriverStation.Alliance.Red
-                              ? Constants.RED_SPEAKER_POSE
-                              : Constants.BLUE_SPEAKER_POSE;
+    // m_driveController
+    //     .leftBumper()
+    //     .whileTrue(
+    //         new FieldOrientedWithCardinal(
+    //             m_chassis,
+    //             m_poseEstimator,
+    //             () -> {
+    //               Supplier<Translation2d> target =
+    //                   () ->
+    //                       DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+    //                           ? Constants.RED_SPEAKER_POSE
+    //                           : Constants.BLUE_SPEAKER_POSE;
 
-                  double angle =
-                      CalcAimAngle.calcAimAngle(
-                          target,
-                          m_poseEstimator::getFusedPose,
-                          m_poseEstimator::getEstimatedVel,
-                          () -> 18,
-                          () -> 45,
-                          1);
-                  Logger.recordOutput(
-                      "Aiming angle",
-                      new Pose2d(
-                          m_poseEstimator.getFusedPose().getTranslation(),
-                          Rotation2d.fromRadians(angle + Math.PI)));
-                  //   angle *=
-                  //       m_poseEstimator.getEstimatedVel().getY()
-                  //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
-                  return angle + Math.PI;
-                },
-                m_baseDrive::calculateChassisSpeeds,
-                RobotConstants.ROTATION_PID,
-                RobotConstants.ROTATION_CONSTRAINTS,
-                RobotConstants.ROTATION_FF));
+    //               double angle =
+    //                   CalcAimAngle.calcAimAngle(
+    //                       target,
+    //                       m_poseEstimator::getFusedPose,
+    //                       m_poseEstimator::getEstimatedVel,
+    //                       () -> 18,
+    //                       () -> 45,
+    //                       1);
+    //               Logger.recordOutput(
+    //                   "Aiming angle",
+    //                   new Pose2d(
+    //                       m_poseEstimator.getFusedPose().getTranslation(),
+    //                       Rotation2d.fromRadians(angle + Math.PI)));
+    //               //   angle *=
+    //               //       m_poseEstimator.getEstimatedVel().getY()
+    //               //           * RobotConstants.SPEAKER_AIM_VEL_COEFF;
+    //               return angle + Math.PI;
+    //             },
+    //             m_baseDrive::calculateChassisSpeeds,
+    //             RobotConstants.ROTATION_PID,
+    //             RobotConstants.ROTATION_CONSTRAINTS,
+    //             RobotConstants.ROTATION_FF));
     m_driveController
         .rightBumper()
         .whileTrue(
