@@ -153,10 +153,11 @@ class CompetitionRobotContainer {
                     m_Elevator,
                     m_poseEstimator,
                     RobotConstants.SHOOT_POINT,
-                    6400,
+                    () -> m_Shooter.getVelocity() * 60,
                     RobotConstants.DISTANCE_RANGE,
                     RobotConstants.HEIGHT_LENGTH_COEFF,
-                    RobotConstants.SHOOTER_RPM_TO_MPS))
+                    RobotConstants.SHOOTER_RPM_TO_MPS,
+                    RobotConstants.WRIST_HIGH_LIM))
             .andThen(m_Wrist.stow()));
     NamedCommands.registerCommand("AmpSetUp", AmpSetUp);
     NamedCommands.registerCommand("scoreInAmp", m_feeder.outtake().withTimeout(2));
@@ -197,10 +198,11 @@ class CompetitionRobotContainer {
             m_Elevator,
             m_poseEstimator,
             RobotConstants.SHOOT_POINT,
-            RobotConstants.SHOOTER_VEL,
+            () -> m_Shooter.getVelocity() * 60,
             RobotConstants.DISTANCE_RANGE,
             RobotConstants.HEIGHT_LENGTH_COEFF,
-            RobotConstants.SHOOTER_RPM_TO_MPS));
+            RobotConstants.SHOOTER_RPM_TO_MPS,
+            RobotConstants.WRIST_HIGH_LIM));
 
     // Need to add and then to stop the feed and shooter
 
@@ -353,10 +355,6 @@ class CompetitionRobotContainer {
     RobotModeTriggers.disabled()
         .onTrue(Commands.runOnce(() -> m_feedback.disabledColorPattern()).ignoringDisable(true));
 
-    m_manipController
-        .leftTrigger(0.5)
-        .whileTrue(m_Shooter.setSpeed(5000))
-        .whileFalse(m_Shooter.setSpeed(0));
     // TODO switch the variable code onto left trigger
 
     // Sets elevator and wrist to Amp score position
@@ -365,23 +363,32 @@ class CompetitionRobotContainer {
     // .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
     // .onFalse(m_Wrist.stow());
 
+    new Trigger(m_feeder::isNoteQueued)
+        .onTrue(
+            Commands.runOnce(
+                () ->
+                    m_Wrist.setDefaultCommand(
+                        new VarShootPrime(
+                            m_Wrist,
+                            m_Elevator,
+                            m_poseEstimator,
+                            RobotConstants.SHOOT_POINT,
+                            () -> m_Shooter.getVelocity() * 60,
+                            RobotConstants.DISTANCE_RANGE,
+                            RobotConstants.HEIGHT_LENGTH_COEFF,
+                            RobotConstants.SHOOTER_RPM_TO_MPS,
+                            RobotConstants.WRIST_HIGH_LIM))))
+        .onFalse(
+            Commands.runOnce(
+                () ->
+                    m_Wrist.setDefaultCommand(
+                        m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM))));
+
     // Where did the old spinup bind go?
     m_manipController
         .leftTrigger(0.5)
-        .whileTrue(
-            m_Shooter
-                .setSpeed(RobotConstants.SHOOTER_VEL)
-                .alongWith(
-                    new VarShootPrime(
-                        m_Wrist,
-                        m_Elevator,
-                        m_poseEstimator,
-                        RobotConstants.SHOOT_POINT,
-                        10000,
-                        RobotConstants.DISTANCE_RANGE,
-                        RobotConstants.HEIGHT_LENGTH_COEFF,
-                        RobotConstants.SHOOTER_RPM_TO_MPS)))
-        .onFalse(m_Shooter.setSpeed(0).andThen(m_Wrist.stow()));
+        .whileTrue(m_Shooter.setSpeed(RobotConstants.SHOOTER_VEL))
+        .onFalse(m_Shooter.setSpeed(0));
 
     m_testController.x().whileTrue(m_feedback.rainbows());
     m_testController.b().whileTrue(m_feedback.setColor(Color.kBlue));
