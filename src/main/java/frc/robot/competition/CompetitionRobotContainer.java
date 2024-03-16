@@ -373,16 +373,14 @@ class CompetitionRobotContainer {
                             m_Elevator,
                             m_poseEstimator,
                             RobotConstants.SHOOT_POINT,
-                            () -> m_Shooter.getVelocity() * 60,
+                            () -> 6000,
                             RobotConstants.DISTANCE_RANGE,
                             RobotConstants.HEIGHT_LENGTH_COEFF,
                             RobotConstants.SHOOTER_RPM_TO_MPS,
                             RobotConstants.WRIST_HIGH_LIM))))
         .onFalse(
-            Commands.runOnce(
-                () ->
-                    m_Wrist.setDefaultCommand(
-                        m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM))));
+            Commands.runOnce(() -> m_Wrist.removeDefaultCommand())
+                .andThen(m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM)));
 
     // Where did the old spinup bind go?
     m_manipController
