@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.628397256794513,
-        "y": 7.349274889025969
+        "x": 7.347687990614077,
+        "y": 7.779285653809404
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.728531514205885,
-        "y": 7.013084654740738
+        "x": 6.597123746628445,
+        "y": 7.693283500852717
       },
       "isLocked": false,
       "linkedName": "C5"
@@ -20,8 +20,8 @@
         "y": 6.82544359374433
       },
       "prevControl": {
-        "x": 4.728531514205885,
-        "y": 7.044358164906805
+        "x": 4.478343432877342,
+        "y": 7.1616338280295615
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": 0.0,
+    "rotation": 20.95577673063218,
     "velocity": 0
   },
   "useDefaultConstraints": false

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2258983756062753,
-      "y": 6.801988461119779
+      "x": 1.2337167531477924,
+      "y": 4.214105494877657
     },
-    "rotation": 27.64597536373862
+    "rotation": -47.489552921999184
   },
   "command": {
     "type": "sequential",
@@ -44,7 +44,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W3.C5"
+            "pathName": "W1.C3"
           }
         },
         {
@@ -56,7 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "C5.4NoteScore"
+            "pathName": "C3.Score"
           }
         },
         {

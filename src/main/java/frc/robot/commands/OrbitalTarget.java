@@ -44,6 +44,9 @@ public class OrbitalTarget extends Command {
 
   private Supplier<Measure<Distance>> orbitDistance;
 
+  /** Set to 180 when on Red */
+  private Rotation2d allianceOffset = Rotation2d.fromDegrees(0);
+
   public OrbitalTarget(
       Chassis chassis,
       Supplier<ChassisSpeeds> speedsSupplier,
@@ -82,12 +85,13 @@ public class OrbitalTarget extends Command {
     xController.reset(robotPose.getX(), vel.getX());
     yController.reset(robotPose.getY(), vel.getY());
     rotController.reset(robotPose.getRotation().getRadians(), vel.getRotation().getRadians());
-    speakerPose =
-        DriverStation.getAlliance().isPresent()
-            ? (DriverStation.getAlliance().get() == Alliance.Red
-                ? Constants.RED_SPEAKER_POSE
-                : Constants.BLUE_SPEAKER_POSE)
-            : Constants.BLUE_SPEAKER_POSE;
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      speakerPose = Constants.RED_SPEAKER_POSE;
+      allianceOffset = Rotation2d.fromDegrees(180);
+    } else {
+      speakerPose = Constants.BLUE_SPEAKER_POSE;
+      allianceOffset = Rotation2d.fromDegrees(0);
+    }
   }
 
   @Override
@@ -132,7 +136,7 @@ public class OrbitalTarget extends Command {
                 xController.calculate(robotPose.getX()),
                 yController.calculate(robotPose.getY()),
                 rotController.calculate(robotPose.getRotation().getRadians())),
-            robotPose.getRotation());
+            robotPose.getRotation().plus(allianceOffset));
 
     speeds.vyMetersPerSecond += speedsSupplier.get().vyMetersPerSecond;
 

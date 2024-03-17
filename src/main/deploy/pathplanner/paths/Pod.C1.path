@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2337167531477924,
-        "y": 4.214105494877657
+        "x": 1.304082151021445,
+        "y": 3.8310049953433243
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.6808689236426093,
-        "y": 2.486244058202402
+        "x": 3.751234321516262,
+        "y": 2.1031435586680693
       },
       "isLocked": false,
       "linkedName": "PodStart"
     },
     {
       "anchor": {
-        "x": 7.808972265563579,
-        "y": 0.7662009990686657
+        "x": 7.386779878321661,
+        "y": 0.7974745092347334
       },
       "prevControl": {
-        "x": 4.806715289621056,
-        "y": 1.813863589631942
+        "x": 4.384522902379138,
+        "y": 1.8451370997980097
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,8 +32,8 @@
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0
   },

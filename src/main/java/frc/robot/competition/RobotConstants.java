@@ -79,10 +79,10 @@ class RobotConstants {
   public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG =
       new HolonomicPathFollowerConfig(
           new PIDConstants(2, 0.0, 0.0), // Translation PID constants
-          new PIDConstants(2, 0.0, 0.0), // Rotation PID constants
+          new PIDConstants(4, 0.0, 0.0), // Rotation PID constants
           RobotConstants.MOTION_LIMITS.maxSpeed, // Max module speed, in m/s
           RobotConstants.ROBOT_RADIUS, // Drive$ base radius in meters
-          new ReplanningConfig(false, true) // Default path replanning config.
+          new ReplanningConfig(true, true) // Default path replanning config.
           );
   // TODO Since the above and below are both PID constants for moving the robot to
   // a target pose, perhaps we could use just one set of constants for both
@@ -123,7 +123,7 @@ class RobotConstants {
   public static final double NOMINAL_VOLTAGE = 12;
 
   public static final IdleMode DRIVE_IDLE = IdleMode.kBrake;
-  public static final IdleMode STEER_IDLE = IdleMode.kCoast;
+  public static final IdleMode STEER_IDLE = IdleMode.kBrake;
 
   public static final double STEER_ENC_PID_MIN = 0.0;
   public static final double STEER_ENC_PID_MAX = STEER_ENC_POS_TO_METERS; // TODO
@@ -213,5 +213,5 @@ class RobotConstants {
   //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
   public static final double SHOOTER_VEL = 6000; // RPM
   public static final Range DISTANCE_RANGE = new Range(1.25, 5);
-  public static final double HEIGHT_LENGTH_COEFF = 0.55;
+  public static final double HEIGHT_LENGTH_COEFF = 0.18;
 }

@@ -4,7 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.PoseEstimator;
@@ -14,6 +17,9 @@ public class FieldOrientedDrive extends Command {
   private final Chassis chassis;
   private final Supplier<ChassisSpeeds> speeds;
   private final PoseEstimator poseEstimator;
+
+  /** Set to 180 when on Red */
+  private Rotation2d allianceOffset = Rotation2d.fromDegrees(0);
 
   /** Creates a new FieldOrientedDrive. */
   public FieldOrientedDrive(
@@ -25,11 +31,28 @@ public class FieldOrientedDrive extends Command {
     addRequirements(chassis);
   }
 
+  @Override
+  public void initialize() {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      allianceOffset = Rotation2d.fromDegrees(180);
+    } else {
+      allianceOffset = Rotation2d.fromDegrees(0);
+    }
+  }
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    var allianceInvert = 0;
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+      allianceInvert = 180;
+    }
     chassis.driveRobotRelative(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds.get(), poseEstimator.getFusedPose().getRotation()));
+            speeds.get(),
+            poseEstimator
+                .getFusedPose()
+                .getRotation()
+                .plus(Rotation2d.fromDegrees(allianceInvert))));
   }
 }

@@ -51,7 +51,7 @@ public class Wrist extends SubsystemBase {
     wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
-    Util.setRevStatusRates(wristNeo, 10, 20, 65535, 65535, 65535, 20, 65535, 65535);
+    Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767);
 
     SmartDashboard.putData(this);
     SmartDashboard.putData(enableBrakeMode());

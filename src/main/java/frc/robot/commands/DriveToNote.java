@@ -21,7 +21,7 @@ public class DriveToNote extends Command {
   @Override
   public void execute() {
     double rotationSpeed = 0.07;
-    double movementSpeed = 0.05;
+    double movementSpeed = 0.07;
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
     NetworkTableEntry tx = table.getEntry("tx");

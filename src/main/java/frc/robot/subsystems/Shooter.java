@@ -130,8 +130,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtSpeed(double threshold) {
-    return ((shooterTOP.getVelocity().getValueAsDouble() >= shooterTopVV.Velocity * threshold)
-        && (shooterTopVV.Velocity != 0));
+    return ((getVelocity() >= shooterTopVV.Velocity * threshold) && (shooterTopVV.Velocity != 0));
   }
 
   private void setPIDReferenceTOP(double setPoint) {
@@ -147,6 +146,11 @@ public class Shooter extends SubsystemBase {
   public void setPIDReferenceBOTH(double setPoint) {
     setPIDReferenceTOP(setPoint);
     setPIDReferenceBOTTOM(setPoint);
+  }
+
+  public double getVelocity() {
+    return (shooterTOP.getVelocity().getValueAsDouble() * 0.5)
+        + (shooterBOTTOM.getVelocity().getValueAsDouble() * 0.5);
   }
 
   public Command setSpeed(double setPoint) {

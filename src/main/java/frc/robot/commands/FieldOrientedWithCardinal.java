@@ -7,8 +7,10 @@ package frc.robot.commands;
 import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.classes.Structs;
 import frc.robot.subsystems.chassis.Chassis;
@@ -26,6 +28,9 @@ public class FieldOrientedWithCardinal extends Command {
   private final SimpleMotorFeedforward thetaFF;
   private ChassisSpeeds speeds;
   private double threshold;
+
+  /** Set to 180 when on Red */
+  private Rotation2d allianceOffset = Rotation2d.fromDegrees(0);
 
   /** Creates a new FieldOrientedDrive. */
   public FieldOrientedWithCardinal(
@@ -60,6 +65,12 @@ public class FieldOrientedWithCardinal extends Command {
 
   @Override
   public void initialize() {
+    if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+        == DriverStation.Alliance.Red) {
+      allianceOffset = Rotation2d.fromDegrees(180);
+    } else {
+      allianceOffset = Rotation2d.fromDegrees(0);
+    }
     thetaPID.reset(
         poseEstimator.getFusedPose().getRotation().getRadians(),
         poseEstimator.getEstimatedVel().getRotation().getRadians());
@@ -75,7 +86,8 @@ public class FieldOrientedWithCardinal extends Command {
     speeds.omegaRadiansPerSecond = cardinalRotSpeed;
 
     chassis.driveRobotRelative(
-        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, poseEstimator.getFusedPose().getRotation()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            speeds, poseEstimator.getFusedPose().getRotation().plus(allianceOffset)));
   }
 
   @Override

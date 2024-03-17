@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2258983756062753,
-      "y": 6.801988461119779
+      "x": 1.304082151021445,
+      "y": 3.8310049953433243
     },
-    "rotation": 27.64597536373862
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -24,9 +24,21 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "PodStart.C2"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C2.Score"
           }
         },
         {
@@ -44,7 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W3.C5"
+            "pathName": "PodScore.C3"
           }
         },
         {
@@ -56,7 +68,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "C5.4NoteScore"
+            "pathName": "C3.FarScore"
           }
         },
         {
