@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
 import frc.robot.commands.DriveToNote;
 import frc.robot.commands.FieldOrientedDrive;
-import frc.robot.commands.FieldOrientedWithCardinal;
+import frc.robot.commands.FieldOrientedWithAngle;
 import frc.robot.commands.OrbitalTarget;
 import frc.robot.commands.VarShootPrime;
 import frc.robot.constants.Constants;
@@ -164,7 +164,7 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand("stow", m_Wrist.stow());
     NamedCommands.registerCommand(
         "Target",
-        new FieldOrientedWithCardinal(
+        new FieldOrientedWithAngle(
                 m_chassis,
                 m_poseEstimator,
                 () -> {
@@ -289,7 +289,7 @@ class CompetitionRobotContainer {
     m_driveController
         .leftBumper()
         .whileTrue(
-            new FieldOrientedWithCardinal(
+            new FieldOrientedWithAngle(
                 m_chassis,
                 m_poseEstimator,
                 () -> {
@@ -318,7 +318,7 @@ class CompetitionRobotContainer {
         .or(m_driveController.x())
         .or(m_driveController.y())
         .whileTrue(
-            new FieldOrientedWithCardinal(
+            new FieldOrientedWithAngle(
                 m_chassis,
                 m_poseEstimator,
                 () -> {

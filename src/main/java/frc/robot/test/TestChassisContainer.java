@@ -157,7 +157,7 @@ class TestChassisContainer {
         .or(m_driveController.x())
         .or(m_driveController.y())
         .whileTrue(
-            new FieldOrientedWithCardinal(
+            new FieldOrientedWithAngle(
                 m_chassis,
                 m_poseEstimator,
                 () -> {

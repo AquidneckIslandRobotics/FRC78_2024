@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.classes.Structs;
@@ -18,7 +19,7 @@ import frc.robot.subsystems.chassis.PoseEstimator;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class FieldOrientedWithCardinal extends Command {
+public class FieldOrientedWithAngle extends Command {
   private final Chassis chassis;
   private final Supplier<ChassisSpeeds> speedsSupplier;
   private final PoseEstimator poseEstimator;
@@ -28,12 +29,13 @@ public class FieldOrientedWithCardinal extends Command {
   private final SimpleMotorFeedforward thetaFF;
   private ChassisSpeeds speeds;
   private double threshold;
+  private double offset = 0;
 
   /** Set to 180 when on Red */
   private Rotation2d allianceOffset = Rotation2d.fromDegrees(0);
 
   /** Creates a new FieldOrientedDrive. */
-  public FieldOrientedWithCardinal(
+  public FieldOrientedWithAngle(
       Chassis chassis,
       PoseEstimator poseEstimator,
       DoubleSupplier direction,
@@ -65,29 +67,30 @@ public class FieldOrientedWithCardinal extends Command {
 
   @Override
   public void initialize() {
+    offset =
+        Units.degreesToRadians(poseEstimator.getGyroRot())
+            - poseEstimator.getFusedPose().getRotation().getRadians();
     if (DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
         == DriverStation.Alliance.Red) {
       allianceOffset = Rotation2d.fromDegrees(180);
     } else {
       allianceOffset = Rotation2d.fromDegrees(0);
     }
-    thetaPID.reset(
-        poseEstimator.getFusedPose().getRotation().getRadians(),
-        poseEstimator.getEstimatedVel().getRotation().getRadians());
+    thetaPID.reset(offset, poseEstimator.getEstimatedVel().getRotation().getRadians());
   }
 
   @Override
   public void execute() {
     speeds = speedsSupplier.get();
     thetaPID.setGoal(direction.getAsDouble());
+    double robotAngle = poseEstimator.getGyroRot() - offset;
 
-    double cardinalRotSpeed =
-        thetaPID.calculate(poseEstimator.getFusedPose().getRotation().getRadians());
+    double cardinalRotSpeed = thetaPID.calculate(robotAngle);
     speeds.omegaRadiansPerSecond = cardinalRotSpeed;
 
     chassis.driveRobotRelative(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds, poseEstimator.getFusedPose().getRotation().plus(allianceOffset)));
+            speeds, Rotation2d.fromRadians(robotAngle).plus(allianceOffset)));
   }
 
   @Override
