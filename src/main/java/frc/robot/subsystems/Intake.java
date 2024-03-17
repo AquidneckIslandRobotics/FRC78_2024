@@ -27,8 +27,8 @@ public class Intake extends SubsystemBase {
     intakeTop.restoreFactoryDefaults();
     intakeBottom.restoreFactoryDefaults();
 
-    Util.setRevStatusRates(intakeTop, 500, 65535, 65535, 65535, 65535, 65535, 65535, 65535);
-    Util.setRevStatusRates(intakeBottom, 500, 65535, 65535, 65535, 65535, 65535, 65535, 65535);
+    Util.setRevStatusRates(intakeTop, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(intakeBottom, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
 
     this.intakeSpeed = intakeSpeed;
     this.outtakeSpeed = outtakeSpeed;

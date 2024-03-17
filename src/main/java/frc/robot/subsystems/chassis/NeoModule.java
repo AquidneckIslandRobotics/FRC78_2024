@@ -130,8 +130,8 @@ public class NeoModule implements SwerveModule {
     drive.setIdleMode(config.driveIdleMode);
     steer.setIdleMode(config.steerIdleMode);
 
-    Util.setRevStatusRates(steer, 10, 20, 65535, 65535, 65535, 100, 65535, 65535);
-    Util.setRevStatusRates(drive, 10, 20, 20, 65535, 65535, 65535, 65535, 65535);
+    Util.setRevStatusRates(steer, 10, 20, 32767, 32767, 32767, 100, 32767, 32767);
+    Util.setRevStatusRates(drive, 10, 20, 20, 32767, 32767, 32767, 32767, 32767);
 
     // Save the SPARK MAX configurations. If a SPARK MAX browns out during
     // operation, it will maintain the above configurations.

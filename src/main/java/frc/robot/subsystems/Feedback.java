@@ -25,9 +25,9 @@ public class Feedback extends SubsystemBase {
   public Feedback(int candleID) {
     bracelet = new CANdle(candleID);
     CANdleConfiguration config = new CANdleConfiguration();
-    config.stripType = LEDStripType.RGB; // set the strip type to RGB
     config.brightnessScalar = 0.5; // dim the LEDs to half brightness
     bracelet.configAllSettings(config);
+    bracelet.configLEDType(LEDStripType.RGB);
     this.off();
     this.setDefaultCommand(this.setAllianceColor());
   }
@@ -47,7 +47,7 @@ public class Feedback extends SubsystemBase {
   public Command shooterWheelsAtSpeed() {
     return this.startEnd(
         () -> {
-          StrobeAnimation sa = new StrobeAnimation(255, 0, 0, 255, 0.2, 60, 8);
+          StrobeAnimation sa = new StrobeAnimation(0, 255, 0, 255, 0.2, 68, 0);
           bracelet.clearAnimation(1);
           bracelet.clearAnimation(2);
           bracelet.animate(sa, 1);
@@ -60,7 +60,7 @@ public class Feedback extends SubsystemBase {
         () -> {
           bracelet.clearAnimation(1);
           bracelet.clearAnimation(2);
-          bracelet.setLEDs(255, 0, 0);
+          bracelet.setLEDs(0, 255, 0);
         },
         this::off);
   }
@@ -90,12 +90,12 @@ public class Feedback extends SubsystemBase {
   }
 
   public void disabledColorPattern() {
-    ColorFlowAnimation cfa = new ColorFlowAnimation(0, 0, 255, 255, 0.5, 68, Direction.Forward, 5);
+    ColorFlowAnimation cfa = new ColorFlowAnimation(0, 0, 255, 255, 0.1, 22, Direction.Forward, 4);
     bracelet.clearAnimation(1);
     bracelet.clearAnimation(2);
     bracelet.animate(cfa, 1);
     ColorFlowAnimation cfa2 =
-        new ColorFlowAnimation(255, 0, 0, 255, 0.5, 68, Direction.Backward, 0);
+        new ColorFlowAnimation(0, 255, 0, 255, 0.1, 22, Direction.Backward, 0);
     bracelet.animate(cfa2, 2);
   }
 
@@ -124,19 +124,7 @@ public class Feedback extends SubsystemBase {
     bracelet.clearAnimation(1);
     bracelet.clearAnimation(2);
     bracelet.setLEDs(
-        ((int) (color.red * 255)),
-        ((int) (color.green * 255)),
-        ((int) (color.blue * 255)),
-        127,
-        0,
-        8);
-    bracelet.setLEDs(
-        ((int) (color.green * 255)),
-        ((int) (color.red * 255)),
-        ((int) (color.blue * 255)),
-        127,
-        8,
-        250);
+        ((int) (color.red * 255)), ((int) (color.green * 255)), ((int) (color.blue * 255)));
   }
 
   public Command setColor(Color color) {
@@ -145,19 +133,7 @@ public class Feedback extends SubsystemBase {
           bracelet.clearAnimation(1);
           bracelet.clearAnimation(2);
           bracelet.setLEDs(
-              ((int) (color.red * 255)),
-              ((int) (color.green * 255)),
-              ((int) (color.blue * 255)),
-              127,
-              0,
-              8);
-          bracelet.setLEDs(
-              ((int) (color.green * 255)),
-              ((int) (color.red * 255)),
-              ((int) (color.blue * 255)),
-              127,
-              8,
-              250);
+              ((int) (color.red * 255)), ((int) (color.green * 255)), ((int) (color.blue * 255)));
         });
   }
 

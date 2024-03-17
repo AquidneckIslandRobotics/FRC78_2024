@@ -14,6 +14,8 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkLimitSwitch;
+import com.revrobotics.SparkLimitSwitch.Type;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -21,7 +23,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Velocity;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,7 +35,7 @@ public class Elevator extends SubsystemBase {
   private CANSparkMax elevNeoMotor1;
   private CANSparkMax elevNeoMotor2;
 
-  private DigitalInput reverseLimitSwitch = new DigitalInput(0);
+  private SparkLimitSwitch reverseLimitSwitch;
   private boolean zeroed = false;
 
   public boolean hasNotBeenZeroed() {
@@ -80,11 +81,13 @@ public class Elevator extends SubsystemBase {
     elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, false);
     elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, false);
 
+    reverseLimitSwitch = elevNeoMotor1.getReverseLimitSwitch(Type.kNormallyOpen);
+
     elevNeoMotor1.setInverted(false);
     elevNeoMotor2.follow(elevNeoMotor1, true);
 
-    Util.setRevStatusRates(elevNeoMotor1, 5, 20, 20, 65535, 65535, 65535, 65535, 65535);
-    Util.setRevStatusRates(elevNeoMotor2, 500, 65535, 65535, 65535, 65535, 65535, 65535, 65535);
+    Util.setRevStatusRates(elevNeoMotor1, 5, 20, 20, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(elevNeoMotor2, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
 
     this.setDefaultCommand(setToTarget(0));
     SmartDashboard.putData(enableCoastMode());
@@ -98,7 +101,7 @@ public class Elevator extends SubsystemBase {
   }
 
   private Command lowerElevatorUntilLimitReached() {
-    return run(() -> elevNeoMotor1.set(-.1)).until(() -> !reverseLimitSwitch.get());
+    return run(() -> elevNeoMotor1.set(-.1)).until(() -> reverseLimitSwitch.isPressed());
   }
 
   private Command configureMotorsAfterZeroing() {
@@ -161,7 +164,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void periodic() {
-    Logger.recordOutput("Elevator/limit pressed", !reverseLimitSwitch.get());
+    Logger.recordOutput("Elevator/limit pressed", reverseLimitSwitch.isPressed());
     Logger.recordOutput("Elevator/zeroed", zeroed);
     Logger.recordOutput("Elevator/position", encoder.getPosition());
     Logger.recordOutput(
