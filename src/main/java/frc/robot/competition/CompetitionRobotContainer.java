@@ -26,10 +26,10 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
+import frc.robot.commands.AlignToPose;
 import frc.robot.commands.DriveToNote;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
-import frc.robot.commands.OrbitalTarget;
 import frc.robot.commands.VarShootPrime;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
@@ -270,17 +270,16 @@ class CompetitionRobotContainer {
                 m_chassis));
 
     m_driveController
-        .pov(180)
+        .pov(0)
         .whileTrue(
-            new OrbitalTarget(
+            new AlignToPose(
                 m_chassis,
-                m_baseDrive::calculateChassisSpeeds,
+                Constants.AMP_TRANSFORM,
+                m_poseEstimator,
                 RobotConstants.TRANSLATION_PID,
                 RobotConstants.ROTATION_PID,
-                RobotConstants.MOTION_LIMITS,
-                m_poseEstimator,
-                () -> Constants.ORBIT_RADIUS,
-                RobotConstants.ORBITAL_FF_CONSTANT));
+                RobotConstants.MOTION_LIMITS));
+
     m_driveController
         .leftBumper()
         .whileTrue(
