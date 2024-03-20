@@ -416,7 +416,7 @@ class CompetitionRobotContainer {
                 .alongWith(
                     m_chassis.lockWheels(), m_Wrist.setToTargetCmd(RobotConstants.WRIST_PLOP_ANGLE))
                 .withName("FlatShot"))
-        .onFalse(m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM));
+        .onFalse(m_Wrist.stow());
 
     m_manipController
         .b()
@@ -430,7 +430,8 @@ class CompetitionRobotContainer {
                     1 / RobotConstants.SHOOTER_RPM_TO_MPS,
                     RobotConstants.HIGH_DIST_COEFF)
                 .alongWith(
-                    m_chassis.lockWheels(), m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM)));
+                    m_chassis.lockWheels(), m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM)))
+        .onFalse(m_Wrist.stow());
 
     // Where did the old spinup bind go?
     m_manipController
@@ -479,10 +480,6 @@ class CompetitionRobotContainer {
     m_manipController.leftBumper().whileTrue(m_feeder.outtake());
 
     m_manipController.rightTrigger(0.5).whileTrue(m_feeder.shoot());
-
-    m_testController.a().onTrue(m_Wrist.incrementUp());
-
-    m_testController.b().onTrue(m_Wrist.incrementDown());
 
     // The routine automatically stops the motors at the end of the command
     // sysIdController.a().whileTrue(m_chassis.sysIdQuasistatic(Direction.kForward));

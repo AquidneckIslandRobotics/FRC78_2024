@@ -5,12 +5,15 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,7 +27,11 @@ public class Wrist extends SubsystemBase {
   private CANSparkMax wristNeo;
   private AbsoluteEncoder encoder;
   private double stowPos = 55;
-  private double target = 0;
+
+  private final ArmFeedforward feedforward = new ArmFeedforward(0, .31, 0, 0);
+
+  private final ProfiledPIDController profiledPid =
+      new ProfiledPIDController(0.03, 0, 0, new TrapezoidProfile.Constraints(50, 50));
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
@@ -36,11 +43,7 @@ public class Wrist extends SubsystemBase {
 
     encoder = wristNeo.getAbsoluteEncoder(Type.kDutyCycle);
     encoder.setPositionConversionFactor(360);
-    wristNeo.getPIDController().setFeedbackDevice(encoder);
-    wristNeo.getPIDController().setPositionPIDWrappingEnabled(true);
-    wristNeo.getPIDController().setPositionPIDWrappingMinInput(0);
-    wristNeo.getPIDController().setPositionPIDWrappingMaxInput(360);
-    wristNeo.getPIDController().setP(.03);
+    profiledPid.enableContinuousInput(0, 360);
 
     encoder.setInverted(true);
     encoder.setZeroOffset(0);
@@ -51,40 +54,32 @@ public class Wrist extends SubsystemBase {
     wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
+    profiledPid.setTolerance(2);
+    profiledPid.setGoal(new TrapezoidProfile.State(55, 0));
+
     Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767);
 
     SmartDashboard.putData(this);
     SmartDashboard.putData(enableBrakeMode());
     SmartDashboard.putData(enableCoastMode());
+
+    setDefaultCommand(run(this::moveWrist).withName("Move Wrist"));
+  }
+
+  private void moveWrist() {
+
+    double ff = feedforward.calculate(Units.degreesToRadians(encoder.getPosition() - 180 - 42), 0);
+
+    double fb = profiledPid.calculate(encoder.getPosition());
+    wristNeo.setVoltage(ff + fb);
   }
 
   public Command setToTargetCmd(double target) {
-    this.target = target;
-    return runOnce(() -> wristNeo.getPIDController().setReference(target, ControlType.kPosition))
-        .withName("setGoal[" + target + "]");
+    return Commands.runOnce(() -> profiledPid.setGoal(target)).withName("setGoal[" + target + "]");
   }
 
   public void setToTarget(double target) {
-    this.target = target;
-    wristNeo.getPIDController().setReference(target, ControlType.kPosition);
-  }
-
-  public Command incrementUp() {
-    return runOnce(
-            () -> {
-              target++;
-              wristNeo.getPIDController().setReference(target, ControlType.kPosition);
-            })
-        .withName("Increment Up");
-  }
-
-  public Command incrementDown() {
-    return runOnce(
-            () -> {
-              target--;
-              wristNeo.getPIDController().setReference(target, ControlType.kPosition);
-            })
-        .withName("IncrementDown");
+    profiledPid.setGoal(target);
   }
 
   public Command stow() {
@@ -106,12 +101,16 @@ public class Wrist extends SubsystemBase {
   }
 
   public boolean isAtTarget() {
-    return Math.abs(target - encoder.getPosition()) < 2;
+    return profiledPid.atGoal();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    Logger.recordOutput("Wrist target", profiledPid.getGoal().position);
+    Logger.recordOutput(
+        "Wrist ff",
+        feedforward.calculate(Units.degreesToRadians(encoder.getPosition() - 180 - 42), 0));
     Logger.recordOutput("Wrist Enc Pos", encoder.getPosition());
   }
 }

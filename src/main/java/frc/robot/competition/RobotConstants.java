@@ -174,7 +174,7 @@ class RobotConstants {
   public static final int WRIST_ID = 13;
 
   public static final float WRIST_HIGH_LIM = 55;
-  public static final float WRIST_LOW_LIM = 0;
+  public static final float WRIST_LOW_LIM = 5;
 
   public static final double WRIST_PLOP_ANGLE = 1; // one degree (too lazy to do whole unit thing)
 
