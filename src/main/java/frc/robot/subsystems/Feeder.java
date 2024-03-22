@@ -5,15 +5,18 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.HardwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Feeder extends SubsystemBase {
   private final TalonFX feedMotor;
+  private final TalonFXConfigurator feedMotorConfigurator;
 
   private final HardwareLimitSwitchConfigs INTAKE_CONFIG =
       new HardwareLimitSwitchConfigs().withForwardLimitEnable(true);
@@ -24,6 +27,8 @@ public class Feeder extends SubsystemBase {
   /** Creates a new Feed. */
   public Feeder(int feedID) {
     feedMotor = new TalonFX(feedID);
+    feedMotorConfigurator = feedMotor.getConfigurator();
+    feedMotor.getVelocity().setUpdateFrequency(20);
     feedMotor.getForwardLimit().setUpdateFrequency(100);
 
     feedMotor.optimizeBusUtilization();
@@ -39,22 +44,13 @@ public class Feeder extends SubsystemBase {
    * shooting, since the beam-brake sensor will prevent motor from moving
    */
   public Command intake() {
-    return new FunctionalCommand(
-            () -> {},
-            () -> {},
-            (interrupted) -> {},
-            () -> feedMotor.getConfigurator().apply(INTAKE_CONFIG).isOK())
+    return Commands.waitUntil(() -> feedMotorConfigurator.apply(INTAKE_CONFIG).isOK())
         .andThen(
             startEnd(() -> feedMotor.set(.85), () -> feedMotor.set(0))
                 .until(
                     () ->
                         feedMotor.getForwardLimit().getValue() == ForwardLimitValue.ClosedToGround))
-        .andThen(
-            new FunctionalCommand(
-                () -> {},
-                () -> {},
-                (interrupted) -> {},
-                () -> feedMotor.getConfigurator().apply(SHOOT_CONFIG).isOK()))
+        .andThen(Commands.waitUntil(() -> feedMotorConfigurator.apply(SHOOT_CONFIG).isOK()))
         .withName("Intake");
   }
 
@@ -67,11 +63,7 @@ public class Feeder extends SubsystemBase {
    * shooting, since the beam-brake sensor will prevent motor from moving
    */
   public Command shoot() {
-    return new FunctionalCommand(
-            () -> {},
-            () -> {},
-            (interrupted) -> {},
-            () -> feedMotor.getConfigurator().apply(SHOOT_CONFIG).isOK())
+    return Commands.waitUntil(() -> feedMotorConfigurator.apply(SHOOT_CONFIG).isOK())
         .andThen(
             startEnd(() -> feedMotor.set(1), () -> feedMotor.set(0))
                 .until(() -> feedMotor.getForwardLimit().getValue() == ForwardLimitValue.Open))
@@ -85,6 +77,7 @@ public class Feeder extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Logger.recordOutput("feeder/velocity", feedMotor.getVelocity().getValue());
     SmartDashboard.putBoolean("feeder/note", isNoteQueued());
   }
 }
