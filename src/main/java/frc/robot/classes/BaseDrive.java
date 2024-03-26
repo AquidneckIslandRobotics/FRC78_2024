@@ -14,10 +14,7 @@ import java.util.function.DoubleSupplier;
  * that can then be fed into further processing
  */
 public class BaseDrive {
-  public XboxController controller;
   public Structs.MotionLimits motionLimits;
-  public Structs.RateLimits rateLimit;
-
   private final DoubleSupplier xSupplier;
   private final DoubleSupplier ySupplier;
   private final DoubleSupplier rotSupplier;
@@ -29,14 +26,12 @@ public class BaseDrive {
 
   public BaseDrive(
       XboxController controller, Structs.MotionLimits motionLimits, Structs.RateLimits rateLimits) {
-    this.controller = controller;
     this.motionLimits = motionLimits;
-    this.rateLimit = rateLimits;
     this.xSupplier = () -> -controller.getLeftY();
     this.ySupplier = () -> -controller.getLeftX();
     this.rotSupplier = () -> -controller.getRightX();
-    this.lTriggerSupplier = () -> controller.getLeftTriggerAxis();
-    this.rTriggerSupplier = () -> controller.getRightTriggerAxis();
+    this.lTriggerSupplier = controller::getLeftTriggerAxis;
+    this.rTriggerSupplier = controller::getRightTriggerAxis;
 
     xLimiter = new SlewRateLimiter(rateLimits.translationRateLimit);
     yLimiter = new SlewRateLimiter(rateLimits.translationRateLimit);

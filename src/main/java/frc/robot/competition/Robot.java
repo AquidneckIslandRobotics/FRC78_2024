@@ -12,23 +12,25 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.HashMap;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 public class Robot extends LoggedRobot {
   private Thread visionThread;
-  private PowerDistribution m_pdp;
   private Command m_autonomousCommand;
 
   private CompetitionRobotContainer m_robotContainer;
@@ -38,6 +40,19 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotInit() {
 
+    CommandScheduler.getInstance()
+        .onCommandInitialize(
+            (command) -> {
+              System.out.println("Command initialized: " + command.getName());
+            });
+
+    CommandScheduler.getInstance()
+        .onCommandFinish(
+            (command) -> {
+              System.out.println("Command finish: " + command.getName());
+            });
+
+    DriverStation.silenceJoystickConnectionWarning(true);
     SmartDashboard.putData(CommandScheduler.getInstance());
     PortForwarder.add(5800, "limelight.local", 5800);
     PortForwarder.add(1181, "photonvision.local", 1181);
@@ -45,7 +60,7 @@ public class Robot extends LoggedRobot {
       DataLogManager.start();
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-      m_pdp = new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
+      new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     } else if (REPLAY_MODE) {
       setUseTiming(false); // Run as fast as possible
       String logPath =
@@ -58,6 +73,24 @@ public class Robot extends LoggedRobot {
     }
 
     Logger.start();
+    URCL.start(
+        new HashMap<>() {
+          {
+            put(1, "Front Left Drive");
+            put(2, "Front Left Steer");
+            put(3, "Front Right Drive");
+            put(4, "Front Right Steer");
+            put(5, "Back Left Drive");
+            put(6, "Back Left Steer");
+            put(7, "Back Right Drive");
+            put(8, "Back Right Steer");
+            put(9, "Intake Bottom");
+            put(10, "Intake Top");
+            put(11, "Elevator 11");
+            put(12, "Elevator 12");
+            put(13, "Wrist");
+          }
+        });
     // CTRE logger
     SignalLogger.setPath("/U/ctre-logs/");
     SignalLogger.start();
@@ -88,7 +121,7 @@ public class Robot extends LoggedRobot {
               }
             });
     visionThread.setDaemon(true);
-    visionThread.start();
+    // visionThread.start();
   }
 
   @Override

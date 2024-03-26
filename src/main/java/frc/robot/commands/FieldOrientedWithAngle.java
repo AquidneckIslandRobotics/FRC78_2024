@@ -97,4 +97,9 @@ public class FieldOrientedWithAngle extends Command {
   public boolean isFinished() {
     return threshold != 0 && thetaPID.atGoal();
   }
+
+  @Override
+  public void end(boolean interrupted) {
+    chassis.driveRobotRelative(new ChassisSpeeds());
+  }
 }

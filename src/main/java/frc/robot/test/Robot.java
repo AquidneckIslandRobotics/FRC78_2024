@@ -18,8 +18,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
-  private PowerDistribution m_pdp;
-
   private TestChassisContainer m_robotContainer;
 
   @Override
@@ -29,7 +27,7 @@ public class Robot extends LoggedRobot {
     if (isReal()) {
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-      m_pdp = new PowerDistribution(1, ModuleType.kCTRE); // Enables power distribution logging
+      new PowerDistribution(1, ModuleType.kCTRE); // Enables power distribution logging
     } else {
       setUseTiming(false); // Run as fast as possible
       String logPath =

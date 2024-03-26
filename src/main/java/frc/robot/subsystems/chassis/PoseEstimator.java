@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,6 +46,7 @@ public class PoseEstimator {
 
   public PoseEstimator(
       Chassis chassis,
+      SwerveDriveKinematics kinematics,
       PhotonCamera ATCam1,
       Transform3d cam1Offset,
       int pigeonId,
@@ -63,8 +65,8 @@ public class PoseEstimator {
 
     poseEstimator =
         new SwerveDrivePoseEstimator(
-            chassis.kinematics,
-            Rotation2d.fromDegrees(getGyroRot()),
+            kinematics,
+            getGyroRot(),
             chassis.getPositions(),
             new Pose2d(),
             stateStdDevs,
@@ -99,7 +101,7 @@ public class PoseEstimator {
           Logger.recordOutput("AT Estimate", estimatedPose.get().estimatedPose.toPose2d());
         });
 
-    poseEstimator.update(Rotation2d.fromDegrees(getGyroRot()), chassis.getPositions());
+    poseEstimator.update(getGyroRot(), chassis.getPositions());
     Pose2d currentPose = poseEstimator.getEstimatedPosition();
     vel = currentPose.minus(lastPose); // Why is this robot relative?
     vel =
@@ -108,7 +110,7 @@ public class PoseEstimator {
 
     lastPose = currentPose;
 
-    SmartDashboard.putNumber("gyroYaw", getGyroRot());
+    SmartDashboard.putNumber("gyroYaw", getGyroRot().getDegrees());
     Logger.recordOutput("Estimated Pose", currentPose);
     Logger.recordOutput("Estimated Velocity", getEstimatedVel());
   }
@@ -134,7 +136,7 @@ public class PoseEstimator {
     return ATCam1.getLatestResult();
   }
 
-  public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
+  private Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
     var estStdDevs = singleTagStdDevs;
     var targets = getLatestResult().getTargets();
     int numTags = 0;
@@ -160,11 +162,11 @@ public class PoseEstimator {
   }
 
   public void resetPose(Pose2d pose) {
-    poseEstimator.resetPosition(Rotation2d.fromDegrees(getGyroRot()), chassis.getPositions(), pose);
+    poseEstimator.resetPosition(getGyroRot(), chassis.getPositions(), pose);
   }
 
-  public double getGyroRot() {
-    return pigeon.getYaw().getValueAsDouble();
+  public Rotation2d getGyroRot() {
+    return pigeon.getRotation2d();
   }
 
   public void setGyroRot(double rot) {

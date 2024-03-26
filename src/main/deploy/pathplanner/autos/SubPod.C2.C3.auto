@@ -18,9 +18,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "Score"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "VariableShoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -36,21 +49,47 @@
           }
         },
         {
-          "type": "path",
+          "type": "sequential",
           "data": {
-            "pathName": "C2.Score"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "C2.Score"
+                }
+              },
+              {
+                "type": "deadline",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Target"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "VariableShoot"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Target"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score"
+            "name": "Stow"
           }
         },
         {
@@ -66,21 +105,47 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "C3.FarScore"
+            "name": "Stow"
           }
         },
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Target"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "C3.FarScore"
+                }
+              },
+              {
+                "type": "deadline",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Target"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "VariableShoot"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score"
+                }
+              }
+            ]
           }
         }
       ]

@@ -32,7 +32,7 @@ class RobotConstants {
 
   public static final int PIGEON_ID = 0;
 
-  public static final String AT_CAMERA_NAME = "Arducam_OV9281_USB_Camera";
+  public static final String AT_CAMERA_NAME = "BackCam";
   public static final Transform3d CAM1_OFFSET =
       new Transform3d(
           new Translation3d(-4.5, 0, 17.902).times(Units.inchesToMeters(1)),
@@ -131,14 +131,12 @@ class RobotConstants {
 
   public static final double INTAKE_SPEED_OUT = -0.5;
 
-  public static final double ELEVATOR_CLIMB_HEIGHT = 16;
+  public static final double ELEVATOR_CLIMB_HEIGHT = 17;
 
   // FEED //
   public static final int FEED_ID = 16;
-  public static final int FEED_SENSOR_ID = 17;
 
   // Time of flight sensor range of interest
-  public static final Range2D<Integer> TOF_RANGE = new Range2D<Integer>(10, 10, 11, 11);
   public static final double FEED_SENSOR_THRESHOLD = 300;
 
   public static final double FEED_INTAKE_SPEED = 0.15;
@@ -170,17 +168,17 @@ class RobotConstants {
   public static final int CANDLE_ID = 1;
 
   // TODO auto stuff, but what for and is it needed?
-  public static final double AUTO_SHOOT_SPEED = 5800;
+  public static final double AUTO_SHOOT_SPEED = 3000;
   public static final double AUTO_WRIST_SETPOINT = 0;
   public static final double WRIST_W2_TARGET = 35;
 
   // AUTO WRIST
   public static final Translation2d SHOOT_POINT = new Translation2d(0, 0.56); // TODO
   public static final double SHOOTER_RPM_TO_MPS =
-      (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
+      2 * (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
   //   public static final Range VELOCITY_RANGE =
   //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
-  public static final double SHOOTER_VEL = 6000; // RPM
+  public static final double SHOOTER_VEL = 3000; // RPM
   public static final Range DISTANCE_RANGE = new Range(1.25, 5);
-  public static final double HEIGHT_LENGTH_COEFF = 0.18;
+  public static final double HEIGHT_LENGTH_COEFF = 0.25;
 }

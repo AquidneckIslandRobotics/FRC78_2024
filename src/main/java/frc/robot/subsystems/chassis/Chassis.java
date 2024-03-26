@@ -24,25 +24,17 @@ import frc.robot.classes.Structs.MotionLimits;
 import org.littletonrobotics.junction.Logger;
 
 public class Chassis extends SubsystemBase {
-  public SwerveModule[] modules;
+  private final SwerveModule[] modules = new SwerveModule[4];
 
-  public SwerveModuleState[] setStates;
-
-  public SwerveModuleState[] getStates;
-  public SwerveModulePosition[] getPositions;
-
-  public final SwerveDriveKinematics kinematics;
+  private final SwerveDriveKinematics kinematics;
   private final MotionLimits motionLimits;
 
   public Chassis(
       SwerveModule[] modules, SwerveDriveKinematics kinematics, MotionLimits motionLimits) {
     // It reads the number of modules from the RobotConstants
-    this.modules = modules;
+    System.arraycopy(modules, 0, this.modules, 0, modules.length);
     this.kinematics = kinematics;
     this.motionLimits = motionLimits;
-
-    getStates = new SwerveModuleState[4];
-    getPositions = new SwerveModulePosition[4];
 
     SmartDashboard.putData(this);
     SmartDashboard.putData(enableBrakeMode());
@@ -56,17 +48,19 @@ public class Chassis extends SubsystemBase {
   }
 
   public SwerveModulePosition[] getPositions() {
+    SwerveModulePosition[] currentSwervePositions = new SwerveModulePosition[4];
     for (int i = 0; i < modules.length; i++) {
-      getPositions[i] = modules[i].getPosition();
+      currentSwervePositions[i] = modules[i].getPosition();
     }
-    return getPositions;
+    return currentSwervePositions;
   }
 
   public SwerveModuleState[] getStates() {
+    SwerveModuleState[] currentSwerveStates = new SwerveModuleState[4];
     for (int i = 0; i < modules.length; i++) {
-      getStates[i] = modules[i].getState();
+      currentSwerveStates[i] = modules[i].getState();
     }
-    return getStates;
+    return currentSwerveStates;
   }
 
   // There is probably a better way to feed this into the AutoBuilder, but this is
@@ -76,7 +70,8 @@ public class Chassis extends SubsystemBase {
   }
 
   public void driveRobotRelative(ChassisSpeeds speeds) {
-    SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+    ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(discretizedSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, motionLimits.maxSpeed);
 
     for (int i = 0; i < modules.length; i++) {

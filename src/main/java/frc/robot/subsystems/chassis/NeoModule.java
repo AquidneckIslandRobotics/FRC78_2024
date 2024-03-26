@@ -48,9 +48,9 @@ public class NeoModule implements SwerveModule {
   private RelativeEncoder driveEnc;
   private AbsoluteEncoder steerEnc;
 
-  public SwerveModuleState settingState;
-  public SwerveModuleState realState;
-  public SwerveModuleState optimizedState;
+  private SwerveModuleState settingState;
+  private SwerveModuleState realState;
+  private SwerveModuleState optimizedState;
 
   public NeoModule(int driveID, int steerID, ModuleConfig config, FFConstants ffConstants) {
     this.config = config;
@@ -133,18 +133,7 @@ public class NeoModule implements SwerveModule {
     Util.setRevStatusRates(steer, 10, 20, 32767, 32767, 32767, 100, 32767, 32767);
     Util.setRevStatusRates(drive, 10, 20, 20, 32767, 32767, 32767, 32767, 32767);
 
-    // Save the SPARK MAX configurations. If a SPARK MAX browns out during
-    // operation, it will maintain the above configurations.
-    drive.burnFlash();
-    steer.burnFlash();
-
     settingState.angle = Rotation2d.fromRotations(steerEnc.getPosition());
-    driveEnc.setPosition(0);
-  }
-
-  /** Resets the drive encoder to 0 meters */
-  @Override
-  public void resetEncoders() {
     driveEnc.setPosition(0);
   }
 
@@ -210,38 +199,6 @@ public class NeoModule implements SwerveModule {
   @Override
   public SwerveModuleState getRealState() {
     return realState;
-  }
-
-  /**
-   * Sets the desired velocity of the module. Should only be used if you want to ONLY set the
-   * velocity. If not, then use {@link #setDesiredState(SwerveModuleState)}
-   *
-   * @param velocity The desired velocity of the module, in meters per second
-   */
-  @Override
-  public void setVelocity(double velocity) {
-    drivePID.setReference(
-        velocity,
-        CANSparkMax.ControlType.kVelocity,
-        0,
-        driveFF.calculate(velocity),
-        ArbFFUnits.kVoltage);
-    settingState.speedMetersPerSecond = velocity;
-  }
-
-  /**
-   * Sets the desired rotation of the module. Should only be used if you want to ONLY set the
-   * rotation. If not, then use {@link #setDesiredState(SwerveModuleState)}
-   *
-   * @param rotation The desired rotation of the module
-   */
-  @Override
-  public void setRotation(Rotation2d rotation) {
-    // Optimize the reference state to avoid spinning further than 90 degrees.
-    SwerveModuleState correctedState =
-        SwerveModuleState.optimize(new SwerveModuleState(0, rotation), getSteerPosition());
-    steerPID.setReference(correctedState.angle.getRotations(), CANSparkMax.ControlType.kPosition);
-    settingState.angle = rotation;
   }
 
   /**

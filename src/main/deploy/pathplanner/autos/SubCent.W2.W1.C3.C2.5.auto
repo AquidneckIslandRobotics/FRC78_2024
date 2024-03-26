@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2102616205232415,
-      "y": 6.528345247166685
+      "x": 1.3979026815196491,
+      "y": 5.57
     },
-    "rotation": 47.082565279730886
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -77,7 +77,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W3.C5"
+            "pathName": "CenterNote.StageNote"
           }
         },
         {
@@ -95,12 +95,6 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "path",
-                      "data": {
-                        "pathName": "C5.4NoteScore"
-                      }
-                    },
-                    {
                       "type": "named",
                       "data": {
                         "name": "Target"
@@ -125,9 +119,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Stow"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "4NoteScore.C4"
+            "pathName": "W1.C3"
           }
         },
         {
@@ -137,19 +137,19 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "sequential",
+                "type": "path",
+                "data": {
+                  "pathName": "C3.Score.Cent"
+                }
+              },
+              {
+                "type": "deadline",
                 "data": {
                   "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "C4.Score"
-                      }
-                    },
                     {
                       "type": "named",
                       "data": {
@@ -159,7 +159,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Score"
+                        "name": "VariableShoot"
                       }
                     }
                   ]
@@ -168,15 +168,33 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "VariableShoot"
+                  "name": "Score"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4Score.C2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
           }
         }
       ]
     }
   },
-  "folder": "4 Note Autos",
+  "folder": "5 Note Autos",
   "choreoAuto": false
 }

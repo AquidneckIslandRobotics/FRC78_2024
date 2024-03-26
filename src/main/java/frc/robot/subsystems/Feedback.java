@@ -36,7 +36,7 @@ public class Feedback extends SubsystemBase {
     return this.run(
         () -> {
           var a = DriverStation.getAlliance();
-          if (a.isPresent() & a.get().equals(Alliance.Red)) {
+          if (a.isPresent() && a.get().equals(Alliance.Red)) {
             setMulti(Color.kRed);
           } else {
             setMulti(Color.kBlue);

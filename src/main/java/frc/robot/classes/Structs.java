@@ -77,15 +77,4 @@ public class Structs {
       return max - min;
     }
   }
-
-  public static class Range2D<T> {
-    public T xMin, yMin, xMax, yMax;
-
-    public Range2D(T xMin, T yMin, T xMax, T yMax) {
-      this.xMin = xMin;
-      this.yMin = yMin;
-      this.xMax = xMax;
-      this.yMax = yMax;
-    }
-  }
 }

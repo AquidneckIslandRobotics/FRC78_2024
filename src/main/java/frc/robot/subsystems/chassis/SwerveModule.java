@@ -16,31 +16,25 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
  */
 public interface SwerveModule {
 
-  public void initialize();
+  void initialize();
 
-  public void setBrake(Boolean y);
+  void setBrake(Boolean y);
 
-  public void resetEncoders();
+  double getDriveVelocity(); // Get current drive velocity from  (m/s)
 
-  public double getDriveVelocity(); // Get current drive velocity from  (m/s)
+  double getDrivePosition(); // Get the relative position of the angle motor's encoder
 
-  public double getDrivePosition(); // Get the relative position of the angle motor's encoder
+  Rotation2d getSteerPosition(); // Get the absolute position of the magnetic encoder
 
-  public Rotation2d getSteerPosition(); // Get the absolute position of the magnetic encoder
+  SwerveModuleState getOptimizedState();
 
-  public SwerveModuleState getOptimizedState();
+  SwerveModuleState getRealState();
 
-  public SwerveModuleState getRealState();
+  SwerveModuleState getState();
 
-  public SwerveModuleState getState();
+  SwerveModulePosition getPosition();
 
-  public SwerveModulePosition getPosition();
-
-  public void setVelocity(double velocity); // Set goal drive velocity (m/s)
-
-  public void setRotation(Rotation2d rotation);
-
-  public void setState(SwerveModuleState state);
+  void setState(SwerveModuleState state);
 
   /** Runs the drive motor at a set voltage, while keeping the steer angle at 0 degrees */
   void openLoopDiffDrive(double voltage);

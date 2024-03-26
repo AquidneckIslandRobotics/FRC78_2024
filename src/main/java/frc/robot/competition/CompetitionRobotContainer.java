@@ -7,7 +7,6 @@ package frc.robot.competition;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -21,9 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -92,6 +89,7 @@ class CompetitionRobotContainer {
     m_poseEstimator =
         new PoseEstimator(
             m_chassis,
+            swerveDriveKinematics,
             m_ATCamera,
             RobotConstants.CAM1_OFFSET,
             RobotConstants.PIGEON_ID,
@@ -135,30 +133,12 @@ class CompetitionRobotContainer {
     AmpSetUp = (m_Wrist.setToTargetCmd(19).alongWith(m_Elevator.setToTarget(13.9)));
 
     NamedCommands.registerCommand("Intake", pickUpNote());
-    NamedCommands.registerCommand(
-        "ScoreFromW2",
-        m_Shooter
-            .setSpeed(RobotConstants.AUTO_SHOOT_SPEED)
-            .alongWith(m_Wrist.setToTargetCmd(RobotConstants.WRIST_W2_TARGET))
-            .andThen(Commands.waitUntil(m_Wrist::isAtTarget).withTimeout(1)));
+    NamedCommands.registerCommand("StopShooter", m_Shooter.setSpeed(0));
+
     NamedCommands.registerCommand(
         "StartShooter", m_Shooter.setSpeed(RobotConstants.AUTO_SHOOT_SPEED));
-    NamedCommands.registerCommand(
-        "Score",
-        Commands.waitSeconds(0.5)
-            .andThen(m_feeder.shoot())
-            .deadlineWith(
-                new VarShootPrime(
-                    m_Wrist,
-                    m_Elevator,
-                    m_poseEstimator,
-                    RobotConstants.SHOOT_POINT,
-                    () -> m_Shooter.getVelocity() * 60,
-                    RobotConstants.DISTANCE_RANGE,
-                    RobotConstants.HEIGHT_LENGTH_COEFF,
-                    RobotConstants.SHOOTER_RPM_TO_MPS,
-                    RobotConstants.WRIST_HIGH_LIM))
-            .andThen(m_Wrist.stow()));
+    NamedCommands.registerCommand("Score", Commands.waitSeconds(0.5).andThen(m_feeder.shoot()));
+
     NamedCommands.registerCommand("AmpSetUp", AmpSetUp);
     NamedCommands.registerCommand("scoreInAmp", m_feeder.outtake().withTimeout(2));
     NamedCommands.registerCommand("stow", m_Wrist.stow());
@@ -188,9 +168,11 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF,
-                Units.degreesToRadians(2))
+                Units.degreesToRadians(5)) // was 2 changed in b80 for wk4
             .withTimeout(0.5));
+    NamedCommands.registerCommand("StopShooter", m_Shooter.setSpeed(0));
     NamedCommands.registerCommand("DriveToNote", new DriveToNote(m_chassis).raceWith(pickUpNote()));
+    NamedCommands.registerCommand("Stow", m_Wrist.stow());
     NamedCommands.registerCommand(
         "VariableShoot",
         new VarShootPrime(
@@ -247,25 +229,24 @@ class CompetitionRobotContainer {
   }
 
   Command shortRumble(XboxController controller) {
-    return Commands.runOnce(() -> controller.setRumble(RumbleType.kBothRumble, 1))
-        .andThen(new WaitCommand(.5))
-        .andThen(Commands.runOnce(() -> controller.setRumble(RumbleType.kBothRumble, 0)));
+    return Commands.startEnd(
+            () -> controller.setRumble(RumbleType.kBothRumble, 1),
+            () -> controller.setRumble(RumbleType.kBothRumble, 0))
+        .withTimeout(0.5);
   }
 
   private void configureBindings() {
     new Trigger(m_feeder::isNoteQueued)
+        .whileTrue(m_feedback.noteInCartridge())
+        .and(RobotModeTriggers.teleop())
         .onTrue(shortRumble(m_driveController.getHID()))
         .onTrue(shortRumble(m_manipController.getHID()))
-        .whileTrue(m_feedback.noteInCartridge())
         .onFalse(shortRumble(m_driveController.getHID()));
 
     new Trigger(() -> m_Shooter.isAtSpeed(.9))
-        .onTrue(shortRumble(m_manipController.getHID()))
-        .whileTrue(m_feedback.shooterWheelsAtSpeed());
-
-    m_driveController
-        .start()
-        .onTrue(new InstantCommand(() -> m_poseEstimator.resetPose(new Pose2d())));
+        .whileTrue(m_feedback.shooterWheelsAtSpeed())
+        .and(RobotModeTriggers.teleop())
+        .onTrue(shortRumble(m_manipController.getHID()));
 
     m_driveController
         .rightBumper()
@@ -311,7 +292,8 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_PID,
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF,
-                Units.degreesToRadians(0)));
+                Units.degreesToRadians(5))); // was zero changed in b80 before wk4
+
     m_driveController
         .a()
         .or(m_driveController.b())
@@ -323,11 +305,11 @@ class CompetitionRobotContainer {
                 m_poseEstimator,
                 () -> {
                   double xCardinal =
-                      (m_driveController.y().getAsBoolean() ? 1 : 0)
-                          - (m_driveController.a().getAsBoolean() ? 1 : 0);
+                      (m_driveController.getHID().getYButton() ? 1 : 0)
+                          - (m_driveController.getHID().getAButton() ? 1 : 0);
                   double yCardinal =
-                      (m_driveController.b().getAsBoolean() ? 1 : 0)
-                          - (m_driveController.x().getAsBoolean() ? 1 : 0);
+                      (m_driveController.getHID().getBButton() ? 1 : 0)
+                          - (m_driveController.getHID().getXButton() ? 1 : 0);
                   double dir = -Math.atan2(yCardinal, xCardinal);
                   dir = dir < 0 ? dir + 2 * Math.PI : dir; // TODO
                   // check
@@ -352,53 +334,40 @@ class CompetitionRobotContainer {
         .and(m_Elevator::hasNotBeenZeroed)
         .onTrue(m_Elevator.zeroElevator());
 
+    // We don't actually care about the DS being attached, but the robot is 'disabled' by default,
+    // so onTrue never trips
     RobotModeTriggers.disabled()
-        .onTrue(Commands.runOnce(() -> m_feedback.disabledColorPattern()).ignoringDisable(true));
-
-    // TODO switch the variable code onto left trigger
-
-    // Sets elevator and wrist to Amp score position
-    // m_manipController
-    // .y()
-    // .whileTrue(m_Wrist.setToTarget(19).alongWith(m_Elevator.setToTarget(13.9)))
-    // .onFalse(m_Wrist.stow());
-
-    new Trigger(m_feeder::isNoteQueued)
-        .onTrue(
-            Commands.runOnce(
-                () ->
-                    m_Wrist.setDefaultCommand(
-                        new VarShootPrime(
-                            m_Wrist,
-                            m_Elevator,
-                            m_poseEstimator,
-                            RobotConstants.SHOOT_POINT,
-                            () -> m_Shooter.getVelocity() * 60,
-                            RobotConstants.DISTANCE_RANGE,
-                            RobotConstants.HEIGHT_LENGTH_COEFF,
-                            RobotConstants.SHOOTER_RPM_TO_MPS,
-                            RobotConstants.WRIST_HIGH_LIM))))
-        .onFalse(
-            Commands.runOnce(
-                () ->
-                    m_Wrist.setDefaultCommand(
-                        m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM))));
+        .and(DriverStation::isDSAttached)
+        .onTrue(Commands.runOnce(m_feedback::disabledColorPattern).ignoringDisable(true));
 
     // Where did the old spinup bind go?
     m_manipController
         .leftTrigger(0.5)
-        .whileTrue(m_Shooter.setSpeed(RobotConstants.SHOOTER_VEL))
-        .onFalse(m_Shooter.setSpeed(0));
+        .whileTrue(
+            m_Shooter
+                .setSpeed(RobotConstants.SHOOTER_VEL)
+                .alongWith(
+                    new VarShootPrime(
+                        m_Wrist,
+                        m_Elevator,
+                        m_poseEstimator,
+                        RobotConstants.SHOOT_POINT,
+                        () -> m_Shooter.getVelocity() * 60,
+                        RobotConstants.DISTANCE_RANGE,
+                        RobotConstants.HEIGHT_LENGTH_COEFF,
+                        RobotConstants.SHOOTER_RPM_TO_MPS,
+                        RobotConstants.WRIST_HIGH_LIM)))
+        .onFalse(m_Shooter.setSpeed(0).alongWith(m_Wrist.stow()));
 
     m_testController.x().whileTrue(m_feedback.rainbows());
     m_testController.b().whileTrue(m_feedback.setColor(Color.kBlue));
 
+    // Amp position
     m_manipController
         .y()
-        .whileTrue(
-            m_Wrist
-                .setToTargetCmd(23)
-                .alongWith(m_Elevator.setToTarget(16.3))); // Sets to AMP // sets to STOW
+        .whileTrue(m_Wrist.setToTargetCmd(23).alongWith(m_Elevator.setToTarget(16.3)))
+        .onFalse(m_Wrist.stow());
+
     m_manipController.a().whileTrue(m_Elevator.setToTarget(RobotConstants.ELEVATOR_CLIMB_HEIGHT));
 
     // m_manipController.x().whileTrue(m_Wrist.setToTarget(38)).onFalse(m_Wrist.stow());

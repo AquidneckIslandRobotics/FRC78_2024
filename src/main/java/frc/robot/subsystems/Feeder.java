@@ -75,6 +75,7 @@ public class Feeder extends SubsystemBase {
         .andThen(
             startEnd(() -> feedMotor.set(1), () -> feedMotor.set(0))
                 .until(() -> feedMotor.getForwardLimit().getValue() == ForwardLimitValue.Open))
+        .withTimeout(1)
         .withName("Shoot");
   }
 

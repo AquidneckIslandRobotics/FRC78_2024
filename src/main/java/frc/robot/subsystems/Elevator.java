@@ -44,12 +44,12 @@ public class Elevator extends SubsystemBase {
 
   private RelativeEncoder encoder;
 
-  private final double kS = 0.070936;
-  private final double kV = 0.79005;
-  private final double kA = 0.086892;
-  private final double kG = 0.088056;
+  private static final double kS = 0.070936;
+  private static final double kV = 0.79005;
+  private static final double kA = 0.086892;
+  private static final double kG = 0.088056;
   // Command loop runs at 50Hz, 20ms period
-  private final double kDt = 0.02;
+  private static final double kDt = 0.02;
   private double appliedOutput = 0;
 
   private final Measure<Velocity<Distance>> manualSpeed = InchesPerSecond.of(1);

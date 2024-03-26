@@ -43,16 +43,8 @@ public class FieldOrientedDrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    var allianceInvert = 0;
-    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-      allianceInvert = 180;
-    }
     chassis.driveRobotRelative(
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds.get(),
-            poseEstimator
-                .getFusedPose()
-                .getRotation()
-                .plus(Rotation2d.fromDegrees(allianceInvert))));
+            speeds.get(), poseEstimator.getFusedPose().getRotation().plus(allianceOffset)));
   }
 }

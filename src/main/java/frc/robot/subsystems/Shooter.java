@@ -36,7 +36,7 @@ public class Shooter extends SubsystemBase {
 
   private final NetworkTableEntry slowShot;
 
-  private final double slowShotSpeed = 500;
+  private static final double slowShotSpeed = 500;
 
   private final VoltageOut sysIdVoltage = new VoltageOut(0, false, false, false, false);
   private final SysIdRoutine sysIdRoutine =
