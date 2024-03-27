@@ -4,6 +4,7 @@
 
 package frc.robot.test;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,14 +24,15 @@ import frc.robot.subsystems.chassis.Chassis;
 import frc.robot.subsystems.chassis.NeoModule;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import frc.robot.subsystems.chassis.SwerveModule;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
 
 class TestChassisContainer {
   public final Chassis m_chassis;
   private final BaseDrive m_baseDrive;
   public final PoseEstimator m_poseEstimator;
-  private PhotonCamera m_ATCamera;
   private final CommandXboxController m_driveController;
   private final CommandXboxController m_manipController;
   private final SendableChooser<Command> autoChooser;
@@ -50,19 +52,28 @@ class TestChassisContainer {
 
     SwerveDriveKinematics swerveDriveKinematics = getSwerveDriveKinematics();
 
-    m_ATCamera = new PhotonCamera(RobotConstants.AT_CAMERA_NAME);
+    PhotonCamera camera = new PhotonCamera(RobotConstants.AT_CAMERA_NAME);
 
     m_chassis = new Chassis(modules, swerveDriveKinematics, RobotConstants.MOTION_LIMITS);
 
     m_manipController = new CommandXboxController(0);
 
+    PhotonPoseEstimator poseEstimator =
+        new PhotonPoseEstimator(
+            Constants.APRIL_TAG_FIELD_LAYOUT,
+            PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            camera,
+            RobotConstants.CAM1_OFFSET);
+
+    Pigeon2 pigeon = new Pigeon2(RobotConstants.PIGEON_ID);
+
     m_poseEstimator =
         new PoseEstimator(
             m_chassis,
             swerveDriveKinematics,
-            m_ATCamera,
-            RobotConstants.CAM1_OFFSET,
-            RobotConstants.PIGEON_ID,
+            Constants.APRIL_TAG_FIELD_LAYOUT,
+            List.of(poseEstimator),
+            pigeon,
             RobotConstants.STATE_STD_DEVS,
             RobotConstants.VISION_STD_DEVS,
             RobotConstants.SINGLE_TAG_STD_DEVS,

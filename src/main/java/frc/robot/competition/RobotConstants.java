@@ -32,11 +32,17 @@ class RobotConstants {
 
   public static final int PIGEON_ID = 0;
 
-  public static final String AT_CAMERA_NAME = "BackCam";
-  public static final Transform3d CAM1_OFFSET =
+  public static final String BACK_CAM_NAME = "BackCam";
+  public static final String FRONT_CAM_NAME = "FrontCam";
+  public static final Transform3d BACK_CAM_POSE =
       new Transform3d(
           new Translation3d(-4.5, 0, 17.902).times(Units.inchesToMeters(1)),
-          new Rotation3d(0, Math.toRadians(-30), Math.PI)); // TODO
+          new Rotation3d(0, Math.toRadians(-30), Math.PI));
+
+  public static final Transform3d FRONT_CAM_POSE =
+      new Transform3d(
+          new Translation3d(-4.75, 15.602, 15.602).times(Units.inchesToMeters(1)),
+          new Rotation3d(0, Math.toRadians(-35), 0));
 
   public static final Matrix<N3, N1> STATE_STD_DEVS = VecBuilder.fill(0.1, 0.1, 0.1); // TODO
   public static final Matrix<N3, N1> VISION_STD_DEVS = VecBuilder.fill(1, 1, 1.5);

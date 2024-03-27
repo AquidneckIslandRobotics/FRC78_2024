@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -122,12 +123,14 @@ public class Robot extends LoggedRobot {
             });
     visionThread.setDaemon(true);
     // visionThread.start();
+
+    Notifier poseNotifier = new Notifier(m_robotContainer.m_poseEstimator::update);
+    poseNotifier.startPeriodic(.02);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    m_robotContainer.m_poseEstimator.update();
   }
 
   @Override

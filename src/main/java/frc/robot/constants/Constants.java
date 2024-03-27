@@ -6,6 +6,8 @@ package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,6 +15,8 @@ import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import java.io.IOException;
+import java.util.List;
 import java.util.function.Supplier;
 
 /** This is the constants file for all of the common constants */
@@ -44,4 +48,19 @@ public final class Constants {
   public static final Measure<Distance> ORBIT_RADIUS_MARGIN = Meters.of(1.0);
 
   public static final double GRAVITY = 9.807;
+
+  public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT;
+
+  static {
+    // tempLayout because we can't assign the final field in both the try and catch blocks
+    AprilTagFieldLayout tempLayout;
+    try {
+      tempLayout =
+          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+    } catch (IOException e) {
+      System.err.println("Failed to load AprilTagFieldLayout");
+      tempLayout = new AprilTagFieldLayout(List.of(), 0, 0);
+    }
+    APRIL_TAG_FIELD_LAYOUT = tempLayout;
+  }
 }
