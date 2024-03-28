@@ -7,12 +7,14 @@ package frc.robot.competition;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -127,6 +129,8 @@ class CompetitionRobotContainer {
             RobotConstants.WRIST_ID, RobotConstants.WRIST_HIGH_LIM, RobotConstants.WRIST_LOW_LIM);
 
     m_feeder = new Feeder(RobotConstants.FEED_ID);
+
+    m_Shooter.setDefaultCommand(autoSpinUp(RobotConstants.SHOOTER_VEL));
 
     m_feedback = new Feedback(RobotConstants.CANDLE_ID);
 
@@ -401,6 +405,27 @@ class CompetitionRobotContainer {
 
   public Command pickUpNote() {
     return m_feeder.intake().deadlineWith(m_intake.intakeCommand(), m_Wrist.setToTargetCmd(55));
+  }
+
+  public Command autoSpinUp(double setPoint) {
+    // 3 is in meters xD -- frick u candada
+    return m_Shooter.run(
+        () -> {
+          Translation2d speakerTranslation =
+              DriverStation.getAlliance().isPresent()
+                  ? (DriverStation.getAlliance().get() == Alliance.Red
+                      ? Constants.RED_SPEAKER_POSE
+                      : Constants.BLUE_SPEAKER_POSE)
+                  : Constants.BLUE_SPEAKER_POSE;
+          Pose2d pose = m_poseEstimator.getFusedPose();
+          double l = pose.getTranslation().getDistance(speakerTranslation);
+
+          if (l <= 6 && m_feeder.isNoteQueued()) {
+            m_Shooter.setSpd(setPoint);
+          } else {
+            m_Shooter.setSpd(0);
+          }
+        });
   }
 
   public Command getAutonomousCommand() {

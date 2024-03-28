@@ -164,6 +164,14 @@ public class Shooter extends SubsystemBase {
         });
   }
 
+  public void setSpd(double setPoint){
+      if (slowShot.getBoolean(false)) {
+            this.setPIDReferenceBOTH(Math.min(setPoint, slowShotSpeed));
+          } else {
+            this.setPIDReferenceBOTH(setPoint);
+          }
+  }
+
   @Override
   public void periodic() {
     // TODO is this reading velocity encoder or the setting velocity?
