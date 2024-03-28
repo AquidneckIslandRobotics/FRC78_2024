@@ -18,22 +18,9 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "name": "Score"
           }
         },
         {
@@ -43,35 +30,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         },
         {
@@ -87,41 +54,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "name": "Target"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Stow"
+            "name": "Score"
           }
         },
         {
@@ -137,41 +78,21 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "C3.Score.Cent"
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "VariableShoot"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score"
-                }
-              }
-            ]
+            "pathName": "C3.Score.Cent"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         }
       ]

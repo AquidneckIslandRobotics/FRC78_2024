@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 2.0,
+      "y": 7.0
+    },
+    "rotation": 0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Sq1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "sq2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "sq3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "sq4"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

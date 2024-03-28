@@ -18,22 +18,9 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Score"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "name": "Score"
           }
         },
         {
@@ -43,35 +30,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         },
         {
@@ -87,41 +54,21 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "C5.4NoteScore"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "pathName": "C5.4NoteScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         },
         {
@@ -137,41 +84,21 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "C4.Score"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Target"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "VariableShoot"
-                }
-              }
-            ]
+            "pathName": "C4.Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Target"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
           }
         }
       ]
