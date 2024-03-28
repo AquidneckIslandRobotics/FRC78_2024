@@ -5,7 +5,7 @@
       "x": 1.304082151021445,
       "y": 3.8310049953433243
     },
-    "rotation": -45.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -46,6 +46,12 @@
           "type": "named",
           "data": {
             "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C2.Score"
           }
         },
         {
@@ -102,12 +108,6 @@
           "type": "named",
           "data": {
             "name": "DriveToNote"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stow"
           }
         },
         {
