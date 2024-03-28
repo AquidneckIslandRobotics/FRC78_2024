@@ -11,9 +11,10 @@ import frc.robot.subsystems.chassis.Chassis;
 public class DriveToNote extends Command {
   private final Chassis chassis;
 
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-  NetworkTableEntry tx = table.getEntry("tx");
-  NetworkTableEntry ty = table.getEntry("ty");
+  private final NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  private final NetworkTableEntry tx = table.getEntry("tx");
+  private final NetworkTableEntry ty = table.getEntry("ty");
+  private final NetworkTableEntry tv = table.getEntry("tv");
 
   private final PIDController translationController = new PIDController(0.07, 0, 0);
   private final PIDController rotationController = new PIDController(0.07, 0, 0);

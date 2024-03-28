@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
@@ -231,9 +233,9 @@ class CompetitionRobotContainer {
         frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation);
   }
 
-  Command shortRumble(XboxController controller) {
+  Command shortRumble(XboxController controller, RumbleType rumbleType) {
     return Commands.startEnd(
-            () -> controller.setRumble(RumbleType.kBothRumble, 1),
+            () -> controller.setRumble(rumbleType, 1),
             () -> controller.setRumble(RumbleType.kBothRumble, 0))
         .withTimeout(0.5);
   }
@@ -242,14 +244,23 @@ class CompetitionRobotContainer {
     new Trigger(m_feeder::isNoteQueued)
         .whileTrue(m_feedback.noteInCartridge())
         .and(RobotModeTriggers.teleop())
-        .onTrue(shortRumble(m_driveController.getHID()))
-        .onTrue(shortRumble(m_manipController.getHID()))
-        .onFalse(shortRumble(m_driveController.getHID()));
+        .onTrue(shortRumble(m_driveController.getHID(), RumbleType.kRightRumble))
+        .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kRightRumble))
+        .onFalse(shortRumble(m_driveController.getHID(), RumbleType.kBothRumble));
+
+    // Rumble controllers when target is detected and we don't have a note
+    NetworkTableEntry limelightTargetDetected =
+        NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv");
+    new Trigger(() -> limelightTargetDetected.getDouble(0.0) == 1.0)
+        .and(RobotModeTriggers.teleop())
+        .and(() -> !m_intake.hasNote())
+        .onTrue(shortRumble(m_driveController.getHID(), RumbleType.kLeftRumble))
+        .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kLeftRumble));
 
     new Trigger(() -> m_Shooter.isAtSpeed(.9))
         .whileTrue(m_feedback.shooterWheelsAtSpeed())
         .and(RobotModeTriggers.teleop())
-        .onTrue(shortRumble(m_manipController.getHID()));
+        .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kBothRumble));
 
     m_driveController
         .rightBumper()
