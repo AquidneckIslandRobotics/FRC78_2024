@@ -67,11 +67,9 @@ class RobotConstants {
   public static final RateLimits RATE_LIMITS = new RateLimits(11, 30);
 
   // WHEELS //
-  public static final double DRIVE_GEAR_RATIO = (5.3571);
-  public static final double STEER_GEAR_RATIO = 150 / 7;
-  public static final double NEO_FREESPEED_RPS = 5676 / 60; // Free RPM of NEO to RPS
-  public static final double DRIVE_WHEEL_FREESPEED =
-      (NEO_FREESPEED_RPS * (WHEEL_DIAMETER * Math.PI)) / DRIVE_GEAR_RATIO; // Converted for wheel
+  public static final double DRIVE_GEAR_RATIO = (double) (50 * 45) / (28 * 15);
+  public static final double STEER_GEAR_RATIO = 150.0 / 7.0;
+  public static final double NEO_FREESPEED_RPS = 5676.0 / 60.0; // Free RPM of NEO to RPS
   public static final double STEER_FREESPEED = (NEO_FREESPEED_RPS) / STEER_GEAR_RATIO;
 
   public static final double DRIVE_ENC_TO_METERS = (WHEEL_DIAMETER * Math.PI) / DRIVE_GEAR_RATIO;
