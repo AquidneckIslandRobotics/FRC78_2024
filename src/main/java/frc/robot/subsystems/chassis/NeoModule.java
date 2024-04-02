@@ -4,10 +4,6 @@
 
 package frc.robot.subsystems.chassis;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -22,11 +18,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.classes.Structs.FFConstants;
 import frc.robot.classes.Util;
@@ -238,28 +229,6 @@ public class NeoModule implements SwerveModule {
   public void openLoopDiffDrive(double voltage) {
     steerPID.setReference(0, ControlType.kPosition);
     drive.setVoltage(voltage);
-  }
-
-  /*
-   * Mutate these each time we log so that we aren't creating objects constantly
-   */
-  private final MutableMeasure<Voltage> mutableAppliedVoltage = MutableMeasure.mutable(Volts.of(0));
-  private final MutableMeasure<Distance> mutableDistance = MutableMeasure.mutable(Meters.of(0));
-  private final MutableMeasure<Velocity<Distance>> mutableVelocity =
-      MutableMeasure.mutable(MetersPerSecond.of(0));
-
-  public void logMotor(SysIdRoutineLog log) {
-    log.motor("motor#" + driveID)
-        // Log voltage
-        .voltage(
-            /* getAppliedOutput returns the duty cycle which is from [-1, +1].
-            We multiply this by the voltage going into the spark max,
-            called the bus voltage to receive the output voltage */
-            mutableAppliedVoltage.mut_replace(
-                drive.getAppliedOutput() * drive.getBusVoltage(), Volts))
-        // the drive encoder has the necessary position and velocity conversion factors already set
-        .linearVelocity(mutableVelocity.mut_replace(driveEnc.getVelocity(), MetersPerSecond))
-        .linearPosition(mutableDistance.mut_replace(driveEnc.getPosition(), Meters));
   }
 
   @Override

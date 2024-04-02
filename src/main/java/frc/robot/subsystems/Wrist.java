@@ -4,18 +4,25 @@
 
 package frc.robot.subsystems;
 
+import static com.revrobotics.CANSparkBase.*;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,6 +32,15 @@ public class Wrist extends SubsystemBase {
   private AbsoluteEncoder encoder;
   private double stowPos = 55;
   private double target = 0;
+
+  private final SysIdRoutine sysIdRoutine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(Volts.of(.5).per(Second), Volts.of(2), Seconds.of(10)),
+          new SysIdRoutine.Mechanism(
+              (Measure<Voltage> volts) -> wristNeo.setVoltage(volts.in(Volts)),
+              null,
+              this,
+              "wrist"));
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
@@ -36,6 +52,7 @@ public class Wrist extends SubsystemBase {
 
     encoder = wristNeo.getAbsoluteEncoder(Type.kDutyCycle);
     encoder.setPositionConversionFactor(360);
+    encoder.setVelocityConversionFactor(360.0 / 60.0);
     wristNeo.getPIDController().setFeedbackDevice(encoder);
     wristNeo.getPIDController().setPositionPIDWrappingEnabled(true);
     wristNeo.getPIDController().setPositionPIDWrappingMinInput(0);
@@ -105,6 +122,26 @@ public class Wrist extends SubsystemBase {
 
   public boolean isAtTarget() {
     return Math.abs(target - encoder.getPosition()) < 2;
+  }
+
+  private void configureMotorsBeforeSysId() {
+    Util.setRevStatusRates(wristNeo, 5, 5, 32767, 32767, 32767, 5, 5, 32767);
+  }
+
+  private void configureMotorsAfterSysId() {
+    Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return runOnce(this::configureMotorsBeforeSysId)
+        .andThen(sysIdRoutine.quasistatic(direction))
+        .finallyDo(this::configureMotorsAfterSysId);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return runOnce(this::configureMotorsBeforeSysId)
+        .andThen(sysIdRoutine.dynamic(direction))
+        .finallyDo(this::configureMotorsAfterSysId);
   }
 
   @Override

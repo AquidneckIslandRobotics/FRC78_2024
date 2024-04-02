@@ -7,7 +7,6 @@ package frc.robot.subsystems.chassis;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 
 /**
  * This is the parent interface for a SwerveModule. It is used to define the methods that all
@@ -38,9 +37,6 @@ public interface SwerveModule {
 
   /** Runs the drive motor at a set voltage, while keeping the steer angle at 0 degrees */
   void openLoopDiffDrive(double voltage);
-
-  /** Logs the motor position, velocity, and voltage data for SysId */
-  void logMotor(SysIdRoutineLog log);
 
   void enableBrakeMode();
 
