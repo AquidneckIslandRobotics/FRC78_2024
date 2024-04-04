@@ -323,6 +323,33 @@ class CompetitionRobotContainer {
                 Units.degreesToRadians(0))); // was zero changed in b80 before wk4
 
     m_driveController
+        .pov(180)
+        .whileTrue(
+            new FieldOrientedWithCardinal(
+                m_chassis,
+                m_poseEstimator,
+                () -> {
+                  Translation2d target =
+                      DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+                              == DriverStation.Alliance.Red
+                          ? Constants.RED_AMP.getTranslation()
+                          : Constants.BLUE_AMP.getTranslation();
+                  double angle =
+                      target
+                              .minus(m_poseEstimator.getFusedPose().getTranslation())
+                              .getAngle()
+                              .getRadians()
+                          + Math.PI;
+                  Logger.recordOutput("Aiming angle", angle);
+                  return angle;
+                },
+                m_baseDrive::calculateChassisSpeeds,
+                RobotConstants.ROTATION_PID,
+                RobotConstants.ROTATION_CONSTRAINTS,
+                RobotConstants.ROTATION_FF,
+                Units.degreesToRadians(0))); // was zero changed in b80 before wk4
+
+    m_driveController
         .a()
         .or(m_driveController.b())
         .or(m_driveController.x())

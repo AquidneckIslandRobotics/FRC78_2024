@@ -58,9 +58,9 @@ public class VarFeedPrime extends Command {
     plopTranslation =
         DriverStation.getAlliance().isPresent()
             ? (DriverStation.getAlliance().get() == Alliance.Red
-                ? Constants.RED_PLOP_POSE
-                : Constants.BLUE_PLOP_POSE)
-            : Constants.BLUE_PLOP_POSE;
+                ? Constants.RED_AMP.getTranslation()
+                : Constants.BLUE_AMP.getTranslation())
+            : Constants.RED_AMP.getTranslation();
   }
 
   @Override
