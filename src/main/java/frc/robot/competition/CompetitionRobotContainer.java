@@ -93,7 +93,7 @@ class CompetitionRobotContainer {
 
     PhotonCamera sternCam = new PhotonCamera(RobotConstants.STERN_CAM_NAME);
     PhotonCamera starboardCam = new PhotonCamera(RobotConstants.STARBOARD_CAM_NAME);
-    PhotonCamera portCam = new PhotonCamera(RobotConstants.STARBOARD_CAM_NAME);
+    PhotonCamera portCam = new PhotonCamera(RobotConstants.PORT_CAM_NAME);
 
     PhotonPoseEstimator sternCamPE =
         new PhotonPoseEstimator(
@@ -199,11 +199,13 @@ class CompetitionRobotContainer {
                 RobotConstants.ROTATION_CONSTRAINTS,
                 RobotConstants.ROTATION_FF,
                 Units.degreesToRadians(5)) // was 2 changed in b80 for wk4
-            .withTimeout(0.5));
+            .withTimeout(1));
     NamedCommands.registerCommand("StopShooter", m_Shooter.setSpeedCmd(0));
     NamedCommands.registerCommand(
         "DriveToNote",
-        pickUpNote().deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(2, 0, 0))));
+        pickUpNote()
+            .deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(1, 0, 0)))
+            .withTimeout(2));
     NamedCommands.registerCommand("Stow", m_Wrist.stow());
     NamedCommands.registerCommand(
         "VariableShoot",
@@ -426,9 +428,23 @@ class CompetitionRobotContainer {
                     m_poseEstimator,
                     RobotConstants.SHOOT_POINT,
                     () -> RobotConstants.WRIST_PLOP_ANGLE,
-                    1 / RobotConstants.SHOOTER_RPM_TO_MPS)
+                    1 / RobotConstants.SHOOTER_RPM_TO_MPS,
+                    RobotConstants.STRAIGHT_DIST_COEFF)
                 .alongWith(m_Wrist.setToTargetCmd(RobotConstants.WRIST_PLOP_ANGLE)))
         .onFalse(m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM));
+
+    m_manipController
+        .b()
+        .whileTrue(
+            new VarFeedPrime(
+                    m_Shooter,
+                    m_Elevator,
+                    m_poseEstimator,
+                    RobotConstants.SHOOT_POINT,
+                    () -> RobotConstants.WRIST_HIGH_LIM,
+                    1 / RobotConstants.SHOOTER_RPM_TO_MPS,
+                    RobotConstants.HIGH_DIST_COEFF)
+                .alongWith(m_Wrist.setToTargetCmd(RobotConstants.WRIST_HIGH_LIM)));
 
     // Where did the old spinup bind go?
     m_manipController

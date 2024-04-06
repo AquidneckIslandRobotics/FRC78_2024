@@ -38,12 +38,12 @@ class RobotConstants {
   public static final Transform3d STERN_CAM_POSE =
       new Transform3d(
           new Translation3d(-4.5, 0, 17.902).times(Units.inchesToMeters(1)),
-          new Rotation3d(0, Math.toRadians(-30), Math.PI));
+          new Rotation3d(Math.PI, Math.toRadians(-30), Math.PI));
 
   public static final Transform3d STARBOARD_CAM_POSE =
       new Transform3d(
           new Translation3d(4.465, -10.205, 21.274).times(Units.inchesToMeters(1)),
-          new Rotation3d(0, Math.toRadians(-25), Math.toRadians(-30)));
+          new Rotation3d(Math.PI, Math.toRadians(-25), Math.toRadians(-30)));
 
   public static final Transform3d PORT_CAM_POSE =
       new Transform3d(
@@ -192,7 +192,9 @@ class RobotConstants {
       2 * (Math.PI * Units.inchesToMeters(2.65)) / 60; // Guess based on shooter wheel size
   //   public static final Range VELOCITY_RANGE =
   //       new Range(SHOOTER_RPM_TO_MPS * 5000, SHOOTER_RPM_TO_MPS * 5001);
-  public static final double SHOOTER_VEL = 4500; // RPM
+  public static final double SHOOTER_VEL = 4000; // RPM
   public static final Range DISTANCE_RANGE = new Range(1.25, 5);
-  public static final double HEIGHT_LENGTH_COEFF = 0.225;
+  public static final double HEIGHT_LENGTH_COEFF = 0.1;
+  public static final double HIGH_DIST_COEFF = 2.7;
+  public static final double STRAIGHT_DIST_COEFF = 1;
 }

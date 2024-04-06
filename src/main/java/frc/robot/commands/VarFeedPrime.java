@@ -9,8 +9,10 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
@@ -24,13 +26,14 @@ public class VarFeedPrime extends Command {
   private Elevator elevator;
   private PoseEstimator poseEstimator;
   private Translation2d plopTranslation;
-  // private NetworkTableEntry lInput;
+  private NetworkTableEntry lInput;
 
   // Translation of where the note exits in the XZ plane (side view)
   private final Translation2d shooterXZTrans;
 
   private final DoubleSupplier wristAngle;
   private final double MPS_RPM;
+  private final double distCoeff;
 
   /** Creates a new VarShootPrime. */
   public VarFeedPrime(
@@ -39,16 +42,18 @@ public class VarFeedPrime extends Command {
       PoseEstimator poseEstimator,
       Translation2d shooterXZTrans,
       DoubleSupplier wristAngle,
-      double MPS_RPM) {
+      double MPS_RPM,
+      double distCoeff) {
     this.shooter = shooter;
     this.elevator = elevator;
     this.poseEstimator = poseEstimator;
     this.shooterXZTrans = shooterXZTrans;
     this.wristAngle = wristAngle;
     this.MPS_RPM = MPS_RPM;
-    // lInput = SmartDashboard.getEntry("VarFeedPrimeDist");
-    // lInput.setPersistent();
-    // lInput.setDefaultDouble(3);
+    this.distCoeff = distCoeff;
+    lInput = SmartDashboard.getEntry("VarFeedPrimeDist");
+    lInput.setPersistent();
+    lInput.setDefaultDouble(3);
 
     addRequirements(shooter);
   }
@@ -70,7 +75,8 @@ public class VarFeedPrime extends Command {
     // Distance and height to speaker
     double distanceToTarget =
         pose.getTranslation().getDistance(plopTranslation) - shooterXZTrans.getX();
-    // double l = lInput.getDouble(3);
+    distanceToTarget *= distCoeff;
+    // double distanceToTarget = lInput.getDouble(3);
 
     double heightToTarget = shooterXZTrans.getY() - Units.inchesToMeters(elevator.getElevatorPos());
     // Inverts the heigh as we are shooting from the robot to the ground, but the calculations are
