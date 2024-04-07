@@ -276,13 +276,16 @@ class CompetitionRobotContainer {
         .onFalse(shortRumble(m_driveController.getHID(), RumbleType.kBothRumble));
 
     // Rumble controllers when target is detected and we don't have a note
-    NetworkTableEntry limelightTargetDetected =
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv");
-    new Trigger(() -> limelightTargetDetected.getDouble(0.0) == 1.0)
+    NetworkTableEntry photonvisionTargetDetected =
+        NetworkTableInstance.getDefault().getTable("photonvision/Fisheye").getEntry("hasTarget");
+    new Trigger(() -> photonvisionTargetDetected.getBoolean(false))
         .and(RobotModeTriggers.teleop())
-        .and(() -> !m_intake.hasNote())
+        .whileTrue(m_feedback.noteDetectionLEDs())
+        .and(() -> !m_feeder.isNoteQueued())
         .onTrue(shortRumble(m_driveController.getHID(), RumbleType.kLeftRumble))
         .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kLeftRumble));
+
+    new Trigger(() -> DriverStation.getMatchTime() < 20).onTrue(m_feedback.endgame());
 
     new Trigger(() -> m_Shooter.isAtSpeed(.9))
         .whileTrue(m_feedback.shooterWheelsAtSpeed())
