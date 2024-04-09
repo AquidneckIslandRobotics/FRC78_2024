@@ -100,6 +100,10 @@ public class Elevator extends SubsystemBase {
     return zeroed && encoder.getPosition() <= .5;
   }
 
+  public boolean elevIsAtPos() {
+    return (Math.abs((profiledPid.getGoal().position) - (encoder.getPosition())) >= 2);
+  }
+
   private Command lowerElevatorUntilLimitReached() {
     return run(() -> elevNeoMotor1.set(-.1)).until(() -> reverseLimitSwitch.isPressed());
   }

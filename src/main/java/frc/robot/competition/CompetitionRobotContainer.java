@@ -297,6 +297,10 @@ class CompetitionRobotContainer {
         .and(RobotModeTriggers.teleop())
         .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kBothRumble));
 
+    new Trigger(() -> m_Elevator.elevIsAtPos())
+        .and(RobotModeTriggers.teleop())
+        .onTrue(shortRumble(m_manipController.getHID(), RumbleType.kBothRumble));
+
     m_driveController
         .rightBumper()
         .whileTrue(
