@@ -3,9 +3,9 @@
   "startingPose": {
     "position": {
       "x": 1.304082151021445,
-      "y": 6.700349553080058
+      "y": 3.8310049953433243
     },
-    "rotation": 38.659808254089995
+    "rotation": -51.604835496753935
   },
   "command": {
     "type": "sequential",
@@ -37,9 +37,21 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "PodStart.C2"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "DriveToNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C2.Score"
           }
         },
         {
@@ -75,27 +87,20 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "W3.C5.WayPoin"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "pathName": "CloseScorePod.C1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DriveToNote"
           }
         }
       ]
     }
   },
-  "folder": "4 Note Autos",
+  "folder": null,
   "choreoAuto": false
 }
