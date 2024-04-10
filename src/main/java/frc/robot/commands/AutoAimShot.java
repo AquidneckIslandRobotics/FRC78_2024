@@ -16,12 +16,14 @@ import frc.robot.classes.Structs.Range;
 import frc.robot.classes.Util;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.chassis.PoseEstimator;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
-public class VarShootPrime extends Command {
+public class AutoAimShot extends Command {
+  private Shooter shooter;
   private Wrist wrist;
   private Elevator elevator;
   private PoseEstimator poseEstimator;
@@ -37,7 +39,8 @@ public class VarShootPrime extends Command {
   private final double defaultAngle;
 
   /** Creates a new VarShootPrime. */
-  public VarShootPrime(
+  public AutoAimShot(
+      Shooter shooter,
       Wrist wrist,
       Elevator elevator,
       PoseEstimator poseEstimator,
@@ -47,6 +50,7 @@ public class VarShootPrime extends Command {
       double thetaCoeff,
       double RPM_MPS,
       double defaultAngle) {
+    this.shooter = shooter;
     this.wrist = wrist;
     this.elevator = elevator;
     this.poseEstimator = poseEstimator;
@@ -57,7 +61,7 @@ public class VarShootPrime extends Command {
     this.RPM_MPS = RPM_MPS;
     this.defaultAngle = defaultAngle;
 
-    addRequirements(wrist);
+    addRequirements(wrist, shooter);
   }
 
   @Override
@@ -75,23 +79,31 @@ public class VarShootPrime extends Command {
     Pose2d pose = poseEstimator.getFusedPose();
 
     // Distance and height to speaker
-    double l = pose.getTranslation().getDistance(speakerTranslation) - shooterXZTrans.getX();
-    double h =
+    double distanceFromSpeaker =
+        pose.getTranslation().getDistance(speakerTranslation) - shooterXZTrans.getX();
+
+    if (distanceFromSpeaker < 2) {
+      shooter.setSpeed(3000);
+    } else {
+      shooter.setSpeed(4000);
+    }
+    double heightToShooter =
         (Constants.SPEAKER_HEIGHT.in(Meters) - shooterXZTrans.getY())
             - Units.inchesToMeters(elevator.getElevatorPos());
     // Calculate velocity based on lerping within the velocity range based on the distance range
-    // double v = Util.lerp(Util.clamp(h, distRange) / distRange.getRange(), velRange);
-    double v = shooterVel.getAsDouble() * RPM_MPS;
-    double theta = calcTheta(Constants.GRAVITY, l, h, v);
-    if (theta == Double.NaN) theta = defaultAngle;
+    // double currentShooterSpeed = Util.lerp(Util.clamp(heightToShooter, distRange) /
+    // distRange.getRange(), velRange);
+    double currentShooterSpeed = shooterVel.getAsDouble() * RPM_MPS;
+    double theta =
+        calcTheta(Constants.GRAVITY, distanceFromSpeaker, heightToShooter, currentShooterSpeed);
     theta = Units.radiansToDegrees(theta);
-    double modify = Util.lerp(l, distRange) * heightLengthCoeff;
+    double modify = Util.lerp(distanceFromSpeaker, distRange) * heightLengthCoeff;
     theta += modify;
     Logger.recordOutput("VarShootPrime theta", theta);
     Logger.recordOutput("VarShootPrime modify", modify);
-    Logger.recordOutput("VarShootPrime h", h);
-    Logger.recordOutput("VarShootPrime v", v);
-    Logger.recordOutput("VarShootPrime l", l);
+    Logger.recordOutput("VarShootPrime heightToShooter", heightToShooter);
+    Logger.recordOutput("VarShootPrime currentShooterSpeed", currentShooterSpeed);
+    Logger.recordOutput("VarShootPrime l", distanceFromSpeaker);
 
     wrist.setToTarget(theta);
   }
@@ -99,7 +111,7 @@ public class VarShootPrime extends Command {
   // Source? It was revealed to me by a wise tree in a dream
   // JK this https://en.wikipedia.org/wiki/Projectile_motion
   private double calcTheta(double g, double l, double h, double v) {
-    double sqrt = Math.pow(v, 4) - (g * ((g * l * l) + (2 * h * v * v)));
+    double sqrt = v * v * v * v - (g * ((g * l * l) + (2 * h * v * v)));
     double numerator = (v * v) - Math.sqrt(sqrt);
     double denominator = g * l;
 

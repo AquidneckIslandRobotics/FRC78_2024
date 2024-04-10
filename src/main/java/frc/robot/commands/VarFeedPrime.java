@@ -81,15 +81,14 @@ public class VarFeedPrime extends Command {
     double theta = Math.toRadians(wristAngle.getAsDouble());
     double calcVel = calcVel(Constants.GRAVITY, distanceToTarget, heightToTarget, theta);
     // Safety for NaN, probably should put this in the setSpeed() itself though
-    double vel = calcVel == Double.NaN ? 0 : calcVel;
 
     Logger.recordOutput("VarFeedPrime theta", theta);
     Logger.recordOutput("VarFeedPrime h", heightToTarget);
-    Logger.recordOutput("VarFeedPrime v", vel);
+    Logger.recordOutput("VarFeedPrime v", calcVel);
     Logger.recordOutput("VarFeedPrime l", distanceToTarget);
 
-    shooter.setSpeed(vel * MPS_RPM);
-    Logger.recordOutput("VarFeedPrime setV", vel * MPS_RPM);
+    shooter.setSpeed(calcVel * MPS_RPM);
+    Logger.recordOutput("VarFeedPrime setV", calcVel * MPS_RPM);
   }
 
   @Override

@@ -32,11 +32,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.classes.BaseDrive;
 import frc.robot.commands.AlignToNote;
 import frc.robot.commands.AlignToPose;
+import frc.robot.commands.AutoAimShot;
 import frc.robot.commands.DriveToAprilTag;
 import frc.robot.commands.FieldOrientedDrive;
 import frc.robot.commands.FieldOrientedWithCardinal;
 import frc.robot.commands.VarFeedPrime;
-import frc.robot.commands.VarShootPrime;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Feedback;
@@ -209,7 +209,8 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand("Stow", m_Wrist.stow());
     NamedCommands.registerCommand(
         "VariableShoot",
-        new VarShootPrime(
+        new AutoAimShot(
+            m_Shooter,
             m_Wrist,
             m_Elevator,
             m_poseEstimator,
@@ -426,20 +427,18 @@ class CompetitionRobotContainer {
     m_manipController
         .leftTrigger(0.5)
         .whileTrue(
-            m_Shooter
-                .setSpeedCmd(RobotConstants.SHOOTER_VEL)
-                .alongWith(
-                    new VarShootPrime(
-                        m_Wrist,
-                        m_Elevator,
-                        m_poseEstimator,
-                        RobotConstants.SHOOT_POINT,
-                        () -> m_Shooter.getVelocity() * 60,
-                        RobotConstants.DISTANCE_RANGE,
-                        RobotConstants.HEIGHT_LENGTH_COEFF,
-                        RobotConstants.SHOOTER_RPM_TO_MPS,
-                        RobotConstants.WRIST_HIGH_LIM)))
-        .onFalse(m_Shooter.setSpeedCmd(0).alongWith(m_Wrist.stow()));
+            new AutoAimShot(
+                m_Shooter,
+                m_Wrist,
+                m_Elevator,
+                m_poseEstimator,
+                RobotConstants.SHOOT_POINT,
+                () -> m_Shooter.getVelocity() * 60,
+                RobotConstants.DISTANCE_RANGE,
+                RobotConstants.HEIGHT_LENGTH_COEFF,
+                RobotConstants.SHOOTER_RPM_TO_MPS,
+                RobotConstants.WRIST_HIGH_LIM))
+        .onFalse(m_Shooter.setSpeedCmd(0).alongWith(m_Wrist.stow()).withName("Feed End"));
 
     m_testController.x().whileTrue(m_feedback.rainbows());
     m_testController.b().whileTrue(m_feedback.setColor(Color.kBlue));
