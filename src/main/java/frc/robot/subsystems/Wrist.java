@@ -14,13 +14,20 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
+
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 public class Wrist extends SubsystemBase {
 
@@ -32,6 +39,12 @@ public class Wrist extends SubsystemBase {
 
   private final ProfiledPIDController profiledPid =
       new ProfiledPIDController(0.03, 0, 0, new TrapezoidProfile.Constraints(50, 50));
+
+
+  private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
+          new SysIdRoutine.Config(Volts.of(1).per(Second), Volts.of(3), Seconds.of(4), (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
+          new SysIdRoutine.Mechanism(voltageMeasure -> wristNeo.setVoltage(voltageMeasure.in(Volts)), null, this, "wrist"));
+  )
 
   /** Creates a new Wrist. */
   public Wrist(int WRIST_ID, float WRIST_HIGH_LIM, float WRIST_LOW_LIM) {
@@ -55,7 +68,7 @@ public class Wrist extends SubsystemBase {
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     profiledPid.setTolerance(2);
-    profiledPid.setGoal(new TrapezoidProfile.State(55, 0));
+    profiledPid.setGoal(new TrapezoidProfile.State(WRIST_HIGH_LIM, 0));
 
     Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767);
 
@@ -63,15 +76,18 @@ public class Wrist extends SubsystemBase {
     SmartDashboard.putData(enableBrakeMode());
     SmartDashboard.putData(enableCoastMode());
 
-    setDefaultCommand(run(this::moveWrist).withName("Move Wrist"));
+    setDefaultCommand(moveWrist());
   }
 
-  private void moveWrist() {
+  private Command moveWrist() {
+    return run(() -> {
+          double ff =
+              feedforward.calculate(Units.degreesToRadians(encoder.getPosition() - 180 - 42), 0);
 
-    double ff = feedforward.calculate(Units.degreesToRadians(encoder.getPosition() - 180 - 42), 0);
-
-    double fb = profiledPid.calculate(encoder.getPosition());
-    wristNeo.setVoltage(ff + fb);
+          double fb = profiledPid.calculate(encoder.getPosition());
+          wristNeo.setVoltage(ff + fb);
+        })
+        .withName("MoveWrist");
   }
 
   public Command setToTargetCmd(double target) {
@@ -102,6 +118,17 @@ public class Wrist extends SubsystemBase {
 
   public boolean isAtTarget() {
     return profiledPid.atGoal();
+  }
+
+  public Command sysIdRoutine() {
+    return Commands.sequence(
+            runOnce(() -> Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 20, 32767)),
+            sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse).until(() -> encoder.getPosition() < 5),
+            sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward),
+            sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse).until(() -> encoder.getPosition() < 5),
+            sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward),
+            runOnce(() -> Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767))
+    );
   }
 
   @Override
