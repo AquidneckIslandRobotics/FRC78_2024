@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.classes.ProjectileMotionsEquations;
 import frc.robot.classes.Structs.Range;
 import frc.robot.classes.Util;
 import frc.robot.constants.Constants;
@@ -82,8 +83,8 @@ public class AutoAimShot extends Command {
     double distanceFromSpeaker =
         pose.getTranslation().getDistance(speakerTranslation) - shooterXZTrans.getX();
 
-    if (distanceFromSpeaker < 2) {
-      shooter.setSpeed(3000);
+    if (distanceFromSpeaker < 3) {
+      shooter.setSpeed(2000);
     } else {
       shooter.setSpeed(4000);
     }
@@ -95,7 +96,8 @@ public class AutoAimShot extends Command {
     // distRange.getRange(), velRange);
     double currentShooterSpeed = shooterVel.getAsDouble() * RPM_MPS;
     double theta =
-        calcTheta(Constants.GRAVITY, distanceFromSpeaker, heightToShooter, currentShooterSpeed);
+        ProjectileMotionsEquations.calculateLaunchAngleForTargetAndVelocity(
+            currentShooterSpeed, heightToShooter, distanceFromSpeaker);
     theta = Units.radiansToDegrees(theta);
     double modify = Util.lerp(distanceFromSpeaker, distRange) * heightLengthCoeff;
     theta += modify;
@@ -106,15 +108,5 @@ public class AutoAimShot extends Command {
     Logger.recordOutput("VarShootPrime l", distanceFromSpeaker);
 
     wrist.setToTarget(theta);
-  }
-
-  // Source? It was revealed to me by a wise tree in a dream
-  // JK this https://en.wikipedia.org/wiki/Projectile_motion
-  private double calcTheta(double g, double l, double h, double v) {
-    double sqrt = v * v * v * v - (g * ((g * l * l) + (2 * h * v * v)));
-    double numerator = (v * v) - Math.sqrt(sqrt);
-    double denominator = g * l;
-
-    return Math.atan(numerator / denominator);
   }
 }
