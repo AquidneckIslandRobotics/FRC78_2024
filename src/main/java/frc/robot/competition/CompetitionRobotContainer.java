@@ -208,7 +208,7 @@ class CompetitionRobotContainer {
     NamedCommands.registerCommand(
         "DriveToNote",
         pickUpNote()
-            .deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(1, 0, 0)))
+            .deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(1.5, 0, 0)))
             .withTimeout(2)
             .withName("Drive to Note"));
     NamedCommands.registerCommand("Stow", m_Wrist.stow());
@@ -305,8 +305,9 @@ class CompetitionRobotContainer {
         .rightBumper()
         .whileTrue(
             pickUpNote()
-                .deadlineWith(new AlignToNote(m_chassis, m_baseDrive::calculateChassisSpeeds))
-                .withName("Auto Note Align"));
+                .deadlineWith(
+                    new AlignToNote(m_chassis, () -> new ChassisSpeeds(2, 0, 0))
+                        .withName("Auto Note Align")));
 
     m_driveController
         .leftBumper()
@@ -462,7 +463,8 @@ class CompetitionRobotContainer {
         .y()
         .whileTrue(
             pickUpNote()
-                .deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(2, 0, 0))));
+                .deadlineWith(new AlignToNote(m_chassis, () -> new ChassisSpeeds(2, 0, 0)))
+                .withTimeout(2));
 
     // Amp position
     m_manipController
