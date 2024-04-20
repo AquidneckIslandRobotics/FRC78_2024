@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.4448129467687512,
-      "y": 5.566684809560096
+      "x": 1.3979026815196491,
+      "y": 5.394680503646721
     },
     "rotation": 0
   },
@@ -55,7 +55,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Cent.W1"
+                  "pathName": "Center.CenterNote"
                 }
               }
             ]
@@ -106,58 +106,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "W1.W2"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Target"
-                }
-              },
-              {
-                "type": "deadline",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Score"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "VariableShoot"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "w2.w3"
+                  "pathName": "W2.W1"
                 }
               }
             ]

@@ -49,7 +49,7 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -59,7 +59,20 @@
                 }
               },
               {
-                "type": "deadline",
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
                 "data": {
                   "commands": [
                     {
@@ -71,7 +84,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "VariableShoot"
+                        "name": "Score"
                       }
                     }
                   ]
@@ -80,7 +93,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Score"
+                  "name": "VariableShoot"
                 }
               }
             ]
@@ -99,7 +112,7 @@
           }
         },
         {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -109,7 +122,20 @@
                 }
               },
               {
-                "type": "deadline",
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
                 "data": {
                   "commands": [
                     {
@@ -121,7 +147,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "VariableShoot"
+                        "name": "Score"
                       }
                     }
                   ]
@@ -130,7 +156,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Score"
+                  "name": "VariableShoot"
                 }
               }
             ]

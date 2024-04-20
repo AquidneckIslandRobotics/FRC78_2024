@@ -443,13 +443,15 @@ class CompetitionRobotContainer {
         .b()
         .whileTrue(
             new VarFeedPrime(
-                m_Shooter,
-                m_Elevator,
-                m_poseEstimator,
-                RobotConstants.SHOOT_POINT,
-                () -> RobotConstants.WRIST_HIGH_LIM,
-                1 / RobotConstants.SHOOTER_RPM_TO_MPS,
-                RobotConstants.HIGH_DIST_COEFF));
+                    m_Shooter,
+                    m_Elevator,
+                    m_poseEstimator,
+                    RobotConstants.SHOOT_POINT,
+                    () -> 52,
+                    1 / RobotConstants.SHOOTER_RPM_TO_MPS,
+                    RobotConstants.HIGH_DIST_COEFF)
+                .alongWith(m_Wrist.setToTargetCmd(52)))
+        .onFalse(m_Wrist.stow());
 
     // Where did the old spinup bind go?
     m_manipController
