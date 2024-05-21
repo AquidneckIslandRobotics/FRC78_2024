@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.InchesPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
 import com.revrobotics.CANSparkBase.FaultID;
@@ -57,11 +56,12 @@ public class Elevator extends SubsystemBase {
   private final ElevatorFeedforward feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
   private final ProfiledPIDController profiledPid =
       new ProfiledPIDController(
-          180,
+          4.57,
           0,
           0,
           new TrapezoidProfile.Constraints(
-              InchesPerSecond.of(15), InchesPerSecond.per(Second).of(80)),
+              InchesPerSecond.of(15).in(InchesPerSecond),
+              InchesPerSecond.per(Second).of(80).in(InchesPerSecond.per(Second))),
           kDt);
 
   public Elevator() {
@@ -193,17 +193,15 @@ public class Elevator extends SubsystemBase {
   public Command setToTarget(double target) {
     return runOnce(
             () -> {
-              profiledPid.setGoal(Units.inchesToMeters(target));
+              profiledPid.setGoal(target);
             })
         .andThen(
             run(
                 () -> {
                   if (!zeroed) return;
                   appliedOutput =
-                      profiledPid.calculate(Units.inchesToMeters(encoder.getPosition()))
-                          + feedforward.calculate(
-                              MetersPerSecond.of(profiledPid.getSetpoint().velocity)
-                                  .in(InchesPerSecond));
+                      profiledPid.calculate(encoder.getPosition())
+                          + feedforward.calculate(profiledPid.getSetpoint().velocity);
                   elevNeoMotor1.setVoltage(appliedOutput);
                 }))
         .withName("setTo[" + target + "]");
