@@ -33,6 +33,7 @@ public class PoseEstimator {
 
   private final Matrix<N3, N1> singleTagStdDevs;
   private final Matrix<N3, N1> multiTagStdDevs;
+  private final double stdDistanceDivisor;
 
   private final AprilTagFieldLayout aprilTagFieldLayout;
 
@@ -45,7 +46,8 @@ public class PoseEstimator {
       Matrix<N3, N1> stateStdDevs,
       Matrix<N3, N1> visionStdDevs,
       Matrix<N3, N1> singleTagStdDevs,
-      Matrix<N3, N1> multiTagStdDevs) {
+      Matrix<N3, N1> multiTagStdDevs,
+      double stdDistanceDivisor) {
     this.visionPoseEstimators = visionPoseEstimators;
     this.aprilTagFieldLayout = aprilTagFieldLayout;
 
@@ -53,6 +55,7 @@ public class PoseEstimator {
 
     this.singleTagStdDevs = singleTagStdDevs;
     this.multiTagStdDevs = multiTagStdDevs;
+    this.stdDistanceDivisor = stdDistanceDivisor;
 
     this.pigeon = pigeon;
 
@@ -128,7 +131,7 @@ public class PoseEstimator {
     // if (numTags == 1 && avgDist > 4)
     //   estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     // else
-    estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+    estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / stdDistanceDivisor));
 
     return estStdDevs;
   }

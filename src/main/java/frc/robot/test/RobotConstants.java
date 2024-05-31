@@ -43,6 +43,8 @@ class RobotConstants {
   public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8);
   public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1);
 
+  public static final double STD_DIVISOR = 20;
+
   public static final Structs.MotionLimits MOTION_LIMITS =
       new Structs.MotionLimits(4, 3 /*TODO */, 8, 18);
 

@@ -126,7 +126,8 @@ class CompetitionRobotContainer {
             RobotConstants.STATE_STD_DEVS,
             RobotConstants.VISION_STD_DEVS,
             RobotConstants.SINGLE_TAG_STD_DEVS,
-            RobotConstants.MULTI_TAG_STD_DEVS);
+            RobotConstants.MULTI_TAG_STD_DEVS,
+            RobotConstants.STD_DISTANCE_DIVISOR);
 
     m_driveController = new CommandXboxController(0);
     m_manipController = new CommandXboxController(1);
