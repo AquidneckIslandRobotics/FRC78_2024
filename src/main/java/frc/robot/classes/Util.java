@@ -13,6 +13,7 @@ import frc.robot.constants.Constants;
 
 /** Utility class */
 public class Util {
+
   /**
    * Adjusts the speeds of the given input depending on trigger input, with left trigger decreasing
    * speed and RT increasing.
@@ -69,23 +70,86 @@ public class Util {
     return range.min + (range.max - range.min) * x;
   }
 
-  public static void setRevStatusRates(
-      CANSparkBase motor,
-      int status0,
-      int status1,
-      int status2,
-      int status3,
-      int status4,
-      int status5,
-      int status6,
-      int status7) {
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, status0);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, status1);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, status2);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, status3);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, status4);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, status5);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, status6);
-    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus7, status7);
+  public static class RevStatusRates {
+
+    public static final int MAX_PERIOD = 32767;
+
+    public int status0;
+    public int status1;
+    public int status2;
+    public int status3;
+    public int status4;
+    public int status5;
+    public int status6;
+    public int status7;
+
+    public RevStatusRates(int status0) {
+      this(
+          status0,
+          MAX_PERIOD,
+          MAX_PERIOD,
+          MAX_PERIOD,
+          MAX_PERIOD,
+          MAX_PERIOD,
+          MAX_PERIOD,
+          MAX_PERIOD);
+    }
+
+    public RevStatusRates(int status0, int status1) {
+      this(
+          status0, status1, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD);
+    }
+
+    public RevStatusRates(int status0, int status1, int status2) {
+      this(status0, status1, status2, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD);
+    }
+
+    public RevStatusRates(int status0, int status1, int status2, int status3) {
+      this(status0, status1, status2, status3, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD);
+    }
+
+    public RevStatusRates(int status0, int status1, int status2, int status3, int status4) {
+      this(status0, status1, status2, status3, status4, MAX_PERIOD, MAX_PERIOD, MAX_PERIOD);
+    }
+
+    public RevStatusRates(
+        int status0, int status1, int status2, int status3, int status4, int status5) {
+      this(status0, status1, status2, status3, status4, status5, MAX_PERIOD, MAX_PERIOD);
+    }
+
+    public RevStatusRates(
+        int status0, int status1, int status2, int status3, int status4, int status5, int status6) {
+      this(status0, status1, status2, status3, status4, status5, status6, MAX_PERIOD);
+    }
+
+    public RevStatusRates(
+        int status0,
+        int status1,
+        int status2,
+        int status3,
+        int status4,
+        int status5,
+        int status6,
+        int status7) {
+      this.status0 = status0;
+      this.status1 = status1;
+      this.status2 = status2;
+      this.status3 = status3;
+      this.status4 = status4;
+      this.status5 = status5;
+      this.status6 = status6;
+      this.status7 = status7;
+    }
+  }
+
+  public static void setRevStatusRates(CANSparkBase motor, RevStatusRates rates) {
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, rates.status0);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, rates.status1);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, rates.status2);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, rates.status3);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, rates.status4);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, rates.status5);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus6, rates.status6);
+    motor.setPeriodicFramePeriod(PeriodicFrame.kStatus7, rates.status7);
   }
 }

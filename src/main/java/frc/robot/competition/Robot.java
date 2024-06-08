@@ -5,6 +5,7 @@
 package frc.robot.competition;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.revrobotics.REVPhysicsSim;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -25,6 +26,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import org.littletonrobotics.urcl.URCL;
 
 public class Robot extends LoggedRobot {
+
   private Command m_autonomousCommand;
 
   private CompetitionRobotContainer m_robotContainer;
@@ -100,15 +102,6 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
-  @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -116,9 +109,6 @@ public class Robot extends LoggedRobot {
       m_autonomousCommand.schedule();
     }
   }
-
-  @Override
-  public void autonomousPeriodic() {}
 
   @Override
   public void autonomousExit() {
@@ -133,9 +123,6 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
-
-  @Override
   public void teleopExit() {
     m_robotContainer.m_chassis.driveRobotRelative(new ChassisSpeeds());
   }
@@ -146,8 +133,7 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void testPeriodic() {}
-
-  @Override
-  public void testExit() {}
+  public void simulationPeriodic() {
+    REVPhysicsSim.getInstance().run();
+  }
 }

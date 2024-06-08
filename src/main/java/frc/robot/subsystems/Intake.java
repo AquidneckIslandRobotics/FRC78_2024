@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.classes.Util;
+import frc.robot.classes.Util.RevStatusRates;
 
 public class Intake extends SubsystemBase {
 
@@ -27,8 +28,8 @@ public class Intake extends SubsystemBase {
     intakeTop.restoreFactoryDefaults();
     intakeBottom.restoreFactoryDefaults();
 
-    Util.setRevStatusRates(intakeTop, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
-    Util.setRevStatusRates(intakeBottom, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(intakeTop, new RevStatusRates(500));
+    Util.setRevStatusRates(intakeBottom, new RevStatusRates(500));
 
     this.intakeSpeed = intakeSpeed;
     this.outtakeSpeed = outtakeSpeed;

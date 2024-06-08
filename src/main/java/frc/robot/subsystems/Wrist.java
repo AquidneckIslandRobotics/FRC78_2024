@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.classes.Util;
+import frc.robot.classes.Util.RevStatusRates;
 import org.littletonrobotics.junction.Logger;
 
 public class Wrist extends SubsystemBase {
@@ -51,7 +52,7 @@ public class Wrist extends SubsystemBase {
     wristNeo.enableSoftLimit(SoftLimitDirection.kForward, true);
     wristNeo.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
-    Util.setRevStatusRates(wristNeo, 10, 20, 32767, 32767, 32767, 20, 32767, 32767);
+    Util.setRevStatusRates(wristNeo, new RevStatusRates(20, 32767, 32767, 32767, 20, 32767, 32767));
 
     SmartDashboard.putData(this);
     SmartDashboard.putData(enableBrakeMode());

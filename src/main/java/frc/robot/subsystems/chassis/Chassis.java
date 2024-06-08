@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.Tracer;
+import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,17 +29,22 @@ import frc.robot.classes.Structs.MotionLimits;
 import org.littletonrobotics.junction.Logger;
 
 public class Chassis extends SubsystemBase {
-  private final SwerveModule[] modules = new SwerveModule[4];
+
+  private final SwerveModule[] modules;
 
   private final SwerveDriveKinematics kinematics;
   private final MotionLimits motionLimits;
 
   private NetworkTable table;
 
+  private Tracer tracer = new Tracer();
+
+  private Watchdog watchdog = new Watchdog(0.02, () -> {});
+
   public Chassis(
       SwerveModule[] modules, SwerveDriveKinematics kinematics, MotionLimits motionLimits) {
     // It reads the number of modules from the RobotConstants
-    System.arraycopy(modules, 0, this.modules, 0, modules.length);
+    this.modules = modules;
     this.kinematics = kinematics;
     this.motionLimits = motionLimits;
 
@@ -80,10 +87,12 @@ public class Chassis extends SubsystemBase {
     ChassisSpeeds discretizedSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] states = kinematics.toSwerveModuleStates(discretizedSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, motionLimits.maxSpeed);
+    watchdog.addEpoch("Setup");
 
     for (int i = 0; i < modules.length; i++) {
       modules[i].setState(states[i]);
     }
+    watchdog.addEpoch("Set States");
 
     SwerveModuleState[] realStates = {
       modules[0].getRealState(),
@@ -101,6 +110,7 @@ public class Chassis extends SubsystemBase {
     Logger.recordOutput("Setting States", states);
     Logger.recordOutput("Optimized States", optimizedStates);
     Logger.recordOutput("Real States", realStates);
+    watchdog.addEpoch("Log");
   }
 
   public Command lockWheels() {

@@ -14,6 +14,7 @@ import frc.robot.subsystems.chassis.PoseEstimator;
 import java.util.function.Supplier;
 
 public class FieldOrientedDrive extends Command {
+
   private final Chassis chassis;
   private final Supplier<ChassisSpeeds> speeds;
   private final PoseEstimator poseEstimator;
@@ -43,8 +44,9 @@ public class FieldOrientedDrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    chassis.driveRobotRelative(
+    ChassisSpeeds chassisSpeeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            speeds.get(), poseEstimator.getFusedPose().getRotation().plus(allianceOffset)));
+            speeds.get(), poseEstimator.getFusedPose().getRotation().plus(allianceOffset));
+    chassis.driveRobotRelative(chassisSpeeds);
   }
 }

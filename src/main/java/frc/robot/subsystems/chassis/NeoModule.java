@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import frc.robot.classes.ModuleConfig;
 import frc.robot.classes.Structs.FFConstants;
 import frc.robot.classes.Util;
+import frc.robot.classes.Util.RevStatusRates;
 import org.littletonrobotics.junction.Logger;
 
 /** Neo implementation of SwerveModule */
@@ -130,8 +131,10 @@ public class NeoModule implements SwerveModule {
     drive.setIdleMode(config.driveIdleMode);
     steer.setIdleMode(config.steerIdleMode);
 
-    Util.setRevStatusRates(steer, 10, 20, 32767, 32767, 32767, 100, 32767, 32767);
-    Util.setRevStatusRates(drive, 10, 20, 20, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(
+        steer, new RevStatusRates(10, 20, 32767, 32767, 32767, 100, 32767, 32767));
+    Util.setRevStatusRates(
+        drive, new RevStatusRates(10, 20, 20, 32767, 32767, 32767, 32767, 32767));
 
     settingState.angle = Rotation2d.fromRotations(steerEnc.getPosition());
     driveEnc.setPosition(0);
