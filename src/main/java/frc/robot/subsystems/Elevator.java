@@ -8,14 +8,11 @@ import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Second;
 
-import com.revrobotics.CANSparkBase.FaultID;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkLimitSwitch;
-import com.revrobotics.SparkLimitSwitch.Type;
+import com.ctre.phoenix.motorcontrol.*;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -32,17 +29,15 @@ import frc.robot.classes.Util;
 import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
-  private CANSparkMax elevNeoMotor1;
-  private CANSparkMax elevNeoMotor2;
+  private TalonFX elevFalconMotor1;
+  private TalonFX elevFalconMotor2;
 
-  private SparkLimitSwitch reverseLimitSwitch;
+  // private SparkLimitSwitch reverseLimitSwitch;
   private boolean zeroed = false;
 
   public boolean hasNotBeenZeroed() {
     return !zeroed;
   }
-
-  private RelativeEncoder encoder;
 
   private static final double kS = 0.070936;
   private static final double kV = 0.79005;
@@ -65,30 +60,33 @@ public class Elevator extends SubsystemBase {
           kDt);
 
   public Elevator() {
-    elevNeoMotor1 = new CANSparkMax(11, MotorType.kBrushless);
-    elevNeoMotor2 = new CANSparkMax(12, MotorType.kBrushless);
+    elevFalconMotor1 = new TalonFX(11);
+    elevFalconMotor2 = new TalonFX(12);
 
-    elevNeoMotor1.restoreFactoryDefaults();
-    elevNeoMotor2.restoreFactoryDefaults();
+    TalonFXConfiguration configs = new TalonFXConfiguration();
+    configs.Feedback.SensorToMechanismRatio = (1.29 * Math.PI) / 25;
+    configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+    configs.Slot0.kP = 1;
+    configs.Slot0.kI = 0;
+    configs.Slot0.kD = 10;
+    configs.Slot0.kV = 2;
 
-    elevNeoMotor1.setIdleMode(IdleMode.kBrake);
-    elevNeoMotor2.setIdleMode(IdleMode.kBrake);
+    elevFalconMotor1.getConfigurator().apply(configs);
+    elevFalconMotor2.getConfigurator().apply(configs);
 
-    encoder = elevNeoMotor1.getEncoder();
-    encoder.setPositionConversionFactor((1.29 * Math.PI) / 25);
-    elevNeoMotor1.getPIDController().setFeedbackDevice(encoder);
-    elevNeoMotor1.getPIDController().setP(.144);
-    elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, false);
-    elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, false);
+    elevFalconMotor1.setNeutralMode(NeutralModeValue.Brake);
+    elevFalconMotor2.setNeutralMode(NeutralModeValue.Brake);
+
     profiledPid.setTolerance(Units.inchesToMeters(0.1));
 
-    reverseLimitSwitch = elevNeoMotor1.getReverseLimitSwitch(Type.kNormallyOpen);
+    // reverseLimitSwitch = elevFalconMotor1.getReverseLimitSwitch(Type.kNormallyOpen);
 
-    elevNeoMotor1.setInverted(false);
-    elevNeoMotor2.follow(elevNeoMotor1, true);
+    elevFalconMotor1.setInverted(false);
+    elevFalconMotor2.Follow(11, false);
 
-    Util.setRevStatusRates(elevNeoMotor1, 5, 20, 20, 32767, 32767, 32767, 32767, 32767);
-    Util.setRevStatusRates(elevNeoMotor2, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(elevFalconMotor1, 5, 20, 20, 32767, 32767, 32767, 32767, 32767);
+    Util.setRevStatusRates(elevFalconMotor2, 500, 32767, 32767, 32767, 32767, 32767, 32767, 32767);
 
     this.setDefaultCommand(setToTarget(0));
     SmartDashboard.putData(enableCoastMode());
@@ -106,7 +104,7 @@ public class Elevator extends SubsystemBase {
   }
 
   private Command lowerElevatorUntilLimitReached() {
-    return run(() -> elevNeoMotor1.set(-.1)).until(() -> reverseLimitSwitch.isPressed());
+    return run(() -> elevFalconMotor1.set(-.1)).until(() -> reverseLimitSwitch.isPressed());
   }
 
   private Command configureMotorsAfterZeroing() {
@@ -114,10 +112,10 @@ public class Elevator extends SubsystemBase {
             () -> {
               encoder.setPosition(0);
               profiledPid.setGoal(0);
-              elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kForward, true);
-              elevNeoMotor1.enableSoftLimit(SoftLimitDirection.kReverse, true);
-              elevNeoMotor1.setSoftLimit(SoftLimitDirection.kForward, 16.4f);
-              elevNeoMotor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
+              elevFalconMotor1.enableSoftLimit(SoftLimitDirection.kForward, true);
+              elevFalconMotor1.enableSoftLimit(SoftLimitDirection.kReverse, true);
+              elevFalconMotor1.setSoftLimit(SoftLimitDirection.kForward, 16.4f);
+              elevFalconMotor1.setSoftLimit(SoftLimitDirection.kReverse, 0);
               zeroed = true;
               this.setDefaultCommand(setToTarget(0));
             })
@@ -152,8 +150,8 @@ public class Elevator extends SubsystemBase {
   public Command enableCoastMode() {
     return Commands.runOnce(
             () -> {
-              elevNeoMotor1.setIdleMode(IdleMode.kCoast);
-              elevNeoMotor2.setIdleMode(IdleMode.kCoast);
+              elevFalconMotor1.setNeutralMode(NeutralModeValue.Coast);
+              elevFalconMotor2.setNeutralMode(NeutralModeValue.Coast);
             })
         .andThen(new PrintCommand("Coast Mode Set On Elevator"))
         .ignoringDisable(true)
@@ -163,8 +161,8 @@ public class Elevator extends SubsystemBase {
   public Command enableBrakeMode() {
     return Commands.runOnce(
             () -> {
-              elevNeoMotor1.setIdleMode(IdleMode.kBrake);
-              elevNeoMotor2.setIdleMode(IdleMode.kBrake);
+              elevFalconMotor1.setNeutralMode(NeutralModeValue.Brake);
+              elevFalconMotor2.setNeutralMode(NeutralModeValue.Brake);
             })
         .andThen(new PrintCommand("Brake Mode Set On Elevator"))
         .ignoringDisable(true)
@@ -176,9 +174,9 @@ public class Elevator extends SubsystemBase {
     Logger.recordOutput("Elevator/zeroed", zeroed);
     Logger.recordOutput("Elevator/position", encoder.getPosition());
     Logger.recordOutput(
-        "Elevator/reverse limit reached", elevNeoMotor1.getFault(FaultID.kSoftLimitRev));
+        "Elevator/reverse limit reached", elevFalconMotor1.getFault(FaultID.kSoftLimitRev));
     Logger.recordOutput(
-        "Elevator/forward limit reached", elevNeoMotor1.getFault(FaultID.kSoftLimitFwd));
+        "Elevator/forward limit reached", elevFalconMotor1.getFault(FaultID.kSoftLimitFwd));
     Logger.recordOutput("Elevator/PIDoutput", profiledPid.getPositionError());
     Logger.recordOutput("Elevator/Profile Velocity", profiledPid.getSetpoint().velocity);
     Logger.recordOutput("Elevator/AppliedVoltage", appliedOutput);
@@ -204,7 +202,7 @@ public class Elevator extends SubsystemBase {
                           + feedforward.calculate(
                               MetersPerSecond.of(profiledPid.getSetpoint().velocity)
                                   .in(InchesPerSecond));
-                  elevNeoMotor1.setVoltage(appliedOutput);
+                  elevFalconMotor1.setVoltage(appliedOutput);
                 }))
         .withName("setTo[" + target + "]");
   }
